@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Kaggle :: Boston Housing - Advanced Regression Techniques
 
+Need to clean up this bulletlist later
 
 * Understand the problem
 We'll look at each variable and do a philosophical analysis about their meaning and importance for this problem.*
