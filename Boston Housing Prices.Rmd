@@ -2,7 +2,7 @@
 title: "Just another price prediction - Kaggle Boston Housing"
 author: "Clobbe Norman"
 date: "11/19/2017"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
