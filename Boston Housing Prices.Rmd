@@ -5,39 +5,64 @@ date: "11/19/2017"
 output: github_document
 ---
 
-Need to clean up this bulletlist later
+```{r setup, include = FALSE, cache = FALSE}
+knitr::opts_chunk$set(error = TRUE)
+```
 
-* Understand the problem
+Need to clean up this bulletlist later + write an introduction to the case and thank Pedro Marcelino for the inspiration and [guidance on his approach to this project](https://www.kaggle.com/pmarcelino/comprehensive-data-exploration-with-python)
+
+1. **Understand the problem**
 We'll look at each variable and do a philosophical analysis about their meaning and importance for this problem.*
 
-* Univariable study
+2. **Univariable study**
 We'll just focus on the dependent variable ('SalePrice') and try to know a little bit more about it.
 
-* Multivariate study
+3. **Multivariate study**
 We'll try to understand how the dependent variable and independent variables relate.
 
-* Basic cleaning
+4. **Basic cleaning**
 We'll clean the dataset and handle the missing data, outliers and categorical variables.
 
-* Test assumptions
+5. **Test assumptions**
 We'll check if our data meets the assumptions required by most multivariate techniques.
 
 ## Pick up the right toolset
-```{r include = FALSE, echo = FALSE}
+
+Meaning, importing the goodies from `tidyverse` for easy data wrangling, `ggplot2` for some nice visualization and `broom` for making sure we don't miss anything while creating our models later on.
+
+```{r }
 require(ggplot2)
 require(tidyverse)
 require(broom)
 
-#Load training and test-set
+```
+
+```{r }
 df.test.raw <- read_csv('test.csv', col_names = T)
 df.train.raw <- read_csv('train.csv', col_names = T)
 
 df.test <- df.test.raw
 df.train <- df.train.raw
+```
 
-glimpse(df.train) #checking the structure of the data frame and it's variables
+Now let's have a look at the the data that we loaded into R.
 
 
+```{r }
+df.train %>% 
+  glimpse()
+
+```
+
+Wow!
+That's impressive - 1,460 observations and 81 variables.
+
+From this quick overview of the dataset it seems like R interpret all the text varibles as `<chr>`, character variables. Something which will mess up later when we want to build our model and doing some visualization.
+
+Let's fix that by turning these characters into proper factors with levels instead.
+
+
+```{r }
 df.test <- df.test %>% 
   unclass() %>% 
   as.data.frame()
@@ -45,15 +70,26 @@ df.test <- df.test %>%
 df.train <- df.train %>% 
   unclass() %>% 
   as.data.frame()
-
-
 ```
 
-## Look at the col names to find cool variables
+Let's have a look now again at the variables.
+
 ```{r }
-sort(colnames(df.train))
+df.train %>%
+  glimpse()
+
 ```
-We did some variable evaluation, tidious but very useful. It was done in a regular Google Spreadsheet.
+
+
+
+##Let's look at the features
+```{r }
+df.train %>% 
+  colnames() %>% 
+  sort()
+
+```
+We did some variable evaluation, tidious but very useful. It was done in a regular [Google Spreadsheet.](https://docs.google.com/spreadsheets/d/16RMnBO7TQLbaJIiphSrcFAlJq7ewtXyojskUUsE__FM/edit?usp=sharing)
 
 From the initial evaluation with determine that some variables are more interesting for houses and some for apartment houses. 
 
