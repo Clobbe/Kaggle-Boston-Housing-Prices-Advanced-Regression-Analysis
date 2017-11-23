@@ -1,0 +1,155 @@
+---
+title: "Just another price prediction - Kaggle Boston Housing"
+author: "Clobbe Norman"
+date: "11/19/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Kaggle :: Boston Housing - Advanced Regression Techniques
+
+
+* Understand the problem
+We'll look at each variable and do a philosophical analysis about their meaning and importance for this problem.*
+
+* Univariable study
+We'll just focus on the dependent variable ('SalePrice') and try to know a little bit more about it.
+
+* Multivariate study
+We'll try to understand how the dependent variable and independent variables relate.
+
+* Basic cleaning
+We'll clean the dataset and handle the missing data, outliers and categorical variables.
+
+* Test assumptions
+We'll check if our data meets the assumptions required by most multivariate techniques.
+
+## Pick up the right toolset
+```{r include = FALSE, echo = FALSE}
+require(ggplot2)
+require(tidyverse)
+require(broom)
+
+#Load training and test-set
+df.test.raw <- read_csv('test.csv', col_names = T)
+df.train.raw <- read_csv('train.csv', col_names = T)
+
+df.test <- df.test.raw
+df.train <- df.train.raw
+
+glimpse(df.train) #checking the structure of the data frame and it's variables
+
+
+df.test <- df.test %>% 
+  unclass() %>% 
+  as.data.frame()
+
+df.train <- df.train %>% 
+  unclass() %>% 
+  as.data.frame()
+
+
+```
+
+## Look at the col names to find cool variables
+```{r }
+sort(colnames(df.train))
+```
+We did some variable evaluation, tidious but very useful. It was done in a regular Google Spreadsheet.
+
+From the initial evaluation with determine that some variables are more interesting for houses and some for apartment houses. 
+
+By following the recommendation from previous author we grouped variables into the three categories:
+* building
+* location
+* space
+
+```{r echo = FALSE }
+#creating segment array's
+segment.building <- c('BldgType','HouseStyle','OverallQual','OverallCond','YearBuilt',
+                      'YearRemodAdd','RoofStyle','RoofMatl','Exterior1st','Exterior2nd',
+                      'MasVnrType','MasVnrArea','ExterQual','ExterCond','Foundation',
+                      'BsmtQual','BsmtCond','BsmtExposure','BsmtFinType1','BsmtFinSF1',
+                      'BsmtFinType2','BsmtFinSF2','BsmtUnfSF','TotalBsmtSF','Heating',
+                      'HeatingQC','CentralAir','Electrical','LowQualFinSF','GrLivArea',
+                      'BsmtFullBath','BsmtHalfBath','FullBath','HalfBath','BedroomAbvGr',
+                      'KitchenAbvGr','KitchenQual','TotRmsAbvGrd','Functional','Fireplaces',
+                      'FireplaceQu','GarageType','GarageYrBlt','GarageFinish','GarageCars',
+                      'GarageArea','GarageQual','GarageCond','PavedDrive','WoodDeckSF',
+                      'OpenPorchSF','EnclosedPorch','X3SsnPorch','ScreenPorch','MiscVal','SalePrice')
+
+segment.location <- c('MSZoning','LandSlope','Neighborhood','Condition1','Condition2', 'SalePrice')
+segment.space <- c('PoolArea','PoolQC','Fence','MiscFeature', 'SalePrice')
+
+```
+
+
+```{r}
+df.train.segment.building <- df.train[,segment.building]
+df.train.segment.location <- df.train[,segment.location]
+df.train.segment.space <- df.train[,segment.space]
+```
+
+###Creating a linear model between each variable in each segment to find 
+
+Not sure yet wether to generate lm() first and then plot each model or create all plots with ggplot with lm() directely and then plot all with facet_grid…
+
+```{r}
+df.segment.building.model <- data.frame(variable = colnames(df.train.segment.building), model = 'na', rsq = 'na')
+
+df.segment.location.model <- data.frame(variable = colnames(df.train.segment.location), model = 'na', rsq = 'na')
+
+df.segment.space.model <- data.frame(variable = colnames(df.train.segment.space), model = 'na', rsq = 'na')
+
+# Code copy + pasted from DataCamp to gen
+# multiple plots, maybe it's possible to gen models with purrr-package?
+library(plyr)
+my_plots <- dlply(mtcars, .(cyl), function(df){
+  ggplot(df, aes(mpg, wt)) +
+    geom_point() +
+    xlim(range(mtcars$mpg)) +
+    ylim(range(mtcars$wt)) +
+    ggtitle(paste(df$cyl[1], 'cylinders'))
+})
+
+t <- lm(df.train.segment.building$BldgType ~ df.train.segment.building[,ncol(df.train.segment.building)], data = df.train.segment.building)
+
+library(ggfortify)
+autoplot(res, ncol = 2)
+
+(model, broom::glance)
+map_dbl(t$residuals, 'r.squared')
+
+ggplot(df.train.segment.building, aes(x = OverallQual , y = SalePrice)) +
+    geom_point(shape=1) +
+    geom_smooth(method=lm, se=FALSE)
+
+
+variable_model <- function(df, xvar){
+  lm(unlist(df[,xvar]) ~ df[,], data = df)
+}
+
+
+lm(as.factor(df.train.segment.building$BldgType) ~ df.train.segment.building$SalePrice, data = df.train.segment.building)
+
+  ggplot(df.train.segment.building, aes(x = as.factor(df.train.segment.building[,segment.building[i]] , y = SalePrice)) +
+    geom_point(shape=1) +
+    geom_smooth(method=lm, se=FALSE)
+
+
+
+
+models <- by_country %>% 
+  mutate(model = map(data, country_model)) %>%
+  # model results are summarised in tidy dataframes using broom
+  mutate(glance = map(model, broom::glance),
+         rsq    = glance %>% map_dbl("r.squared"),
+         tidy   = map(model, broom::tidy),
+         augment= map(model, broom::augment))
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
