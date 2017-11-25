@@ -101,6 +101,9 @@ By following the recommendation from previous author we grouped variables into t
 
 ```{r echo = FALSE }
 #creating segment array's
+df.train <- df.train %>% 
+  mutate(segment = 'na')
+
 segment.building <- c('BldgType','HouseStyle','OverallQual','OverallCond','YearBuilt',
                       'YearRemodAdd','RoofStyle','RoofMatl','Exterior1st','Exterior2nd',
                       'MasVnrType','MasVnrArea','ExterQual','ExterCond','Foundation',
@@ -111,19 +114,17 @@ segment.building <- c('BldgType','HouseStyle','OverallQual','OverallCond','YearB
                       'KitchenAbvGr','KitchenQual','TotRmsAbvGrd','Functional','Fireplaces',
                       'FireplaceQu','GarageType','GarageYrBlt','GarageFinish','GarageCars',
                       'GarageArea','GarageQual','GarageCond','PavedDrive','WoodDeckSF',
-                      'OpenPorchSF','EnclosedPorch','X3SsnPorch','ScreenPorch','MiscVal','SalePrice')
+                      'OpenPorchSF','EnclosedPorch','3SsnPorch','ScreenPorch','MiscVal','SalePrice')
 
 segment.location <- c('MSZoning','LandSlope','Neighborhood','Condition1','Condition2', 'SalePrice')
 segment.space <- c('PoolArea','PoolQC','Fence','MiscFeature', 'SalePrice')
-
 ```
 
+Setting the segmentet data frames
 
 ```{r}
 df.train.segment.building <- df.train %>% select(segment.building)
-
 df.train.segment.location <- df.train %>% select(segment.location)
-
 df.train.segment.space <- df.train %>% select(segment.space)
 ```
 
@@ -132,10 +133,37 @@ df.train.segment.space <- df.train %>% select(segment.space)
 Not sure yet wether to generate lm() first and then plot each model or create all plots with ggplot with lm() directely and then plot all with facet_grid…
 
 ```{r}
-df.train.segment.building.models <- df.train.segment.building %>% 
-  select(HouseStyle, SalePrice) %>% 
 
+segment.building.correlations <- df.train.segment.building %>% 
+                                  select_if(is.numeric) %>%
+                                  map(~cor(x = . , y = df.train.segment.building$SalePrice, method = 'pearson')) %>%
+                                  as_data_frame() %>% 
+                                  t() %>% 
+                                  as.vector()
 
+segment.location.correlations <- df.train.segment.location %>% 
+                                  select_if(is.numeric) %>%
+                                  map(~cor(x = . , y = df.train.segment.location$SalePrice, method = 'pearson')) %>%
+                                  as_data_frame() %>% 
+                                  t() %>% 
+                                  as.vector()
+
+segment.space.correlations <- df.train.segment.space %>% 
+                                  select_if(is.numeric) %>%
+                                  map(~cor(x = . , y = df.train.segment.space$SalePrice, method = 'pearson')) %>%
+                                  as_data_frame() %>% 
+                                  t() %>% 
+                                  as.vector()
+
+df.segments <- bind_rows(df.segments, )
+
+df.segments.tmp <- data.frame(variable = df.train.segment.building %>% 
+                                      select_if(is.numeric) %>% 
+                                      colnames(),
+                  cor_values = segment.building.correlations,
+                  segment = 'building')
+                  
+                
 by_country <- gapminder %>%
   mutate(year1950 = year - 1950 ) %>%  # dataset starts at 1950
   group_by(continent, country) %>%     
