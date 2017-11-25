@@ -22,12 +22,97 @@ Meaning, importing the goodies from `tidyverse` for easy data wrangling, `ggplot
 
 ``` r
 require(ggplot2)
+```
+
+    ## Loading required package: ggplot2
+
+``` r
 require(tidyverse)
+```
+
+    ## Loading required package: tidyverse
+
+    ## ── Attaching packages ────────────────────────────────── tidyverse 1.2.1 ──
+
+    ## ✔ tibble  1.3.4     ✔ purrr   0.2.4
+    ## ✔ tidyr   0.7.2     ✔ dplyr   0.7.4
+    ## ✔ readr   1.1.1     ✔ stringr 1.2.0
+    ## ✔ tibble  1.3.4     ✔ forcats 0.2.0
+
+    ## ── Conflicts ───────────────────────────────────── tidyverse_conflicts() ──
+    ## ✖ dplyr::filter() masks stats::filter()
+    ## ✖ dplyr::lag()    masks stats::lag()
+
+``` r
 require(broom)
+```
 
+    ## Loading required package: broom
+
+``` r
 df.test.raw <- read_csv('test.csv', col_names = T)
-df.train.raw <- read_csv('train.csv', col_names = T)
+```
 
+    ## Parsed with column specification:
+    ## cols(
+    ##   .default = col_character(),
+    ##   Id = col_integer(),
+    ##   MSSubClass = col_integer(),
+    ##   LotFrontage = col_integer(),
+    ##   LotArea = col_integer(),
+    ##   OverallQual = col_integer(),
+    ##   OverallCond = col_integer(),
+    ##   YearBuilt = col_integer(),
+    ##   YearRemodAdd = col_integer(),
+    ##   MasVnrArea = col_integer(),
+    ##   BsmtFinSF1 = col_integer(),
+    ##   BsmtFinSF2 = col_integer(),
+    ##   BsmtUnfSF = col_integer(),
+    ##   TotalBsmtSF = col_integer(),
+    ##   `1stFlrSF` = col_integer(),
+    ##   `2ndFlrSF` = col_integer(),
+    ##   LowQualFinSF = col_integer(),
+    ##   GrLivArea = col_integer(),
+    ##   BsmtFullBath = col_integer(),
+    ##   BsmtHalfBath = col_integer(),
+    ##   FullBath = col_integer()
+    ##   # ... with 17 more columns
+    ## )
+
+    ## See spec(...) for full column specifications.
+
+``` r
+df.train.raw <- read_csv('train.csv', col_names = T)
+```
+
+    ## Parsed with column specification:
+    ## cols(
+    ##   .default = col_character(),
+    ##   Id = col_integer(),
+    ##   MSSubClass = col_integer(),
+    ##   LotFrontage = col_integer(),
+    ##   LotArea = col_integer(),
+    ##   OverallQual = col_integer(),
+    ##   OverallCond = col_integer(),
+    ##   YearBuilt = col_integer(),
+    ##   YearRemodAdd = col_integer(),
+    ##   MasVnrArea = col_integer(),
+    ##   BsmtFinSF1 = col_integer(),
+    ##   BsmtFinSF2 = col_integer(),
+    ##   BsmtUnfSF = col_integer(),
+    ##   TotalBsmtSF = col_integer(),
+    ##   `1stFlrSF` = col_integer(),
+    ##   `2ndFlrSF` = col_integer(),
+    ##   LowQualFinSF = col_integer(),
+    ##   GrLivArea = col_integer(),
+    ##   BsmtFullBath = col_integer(),
+    ##   BsmtHalfBath = col_integer(),
+    ##   FullBath = col_integer()
+    ##   # ... with 18 more columns
+    ## )
+    ## See spec(...) for full column specifications.
+
+``` r
 df.test <- df.test.raw
 df.train <- df.train.raw
 ```
@@ -230,8 +315,8 @@ df.train %>%
     ## $ SaleCondition <fctr> Normal, Normal, Normal, Abnorml, Normal, Normal...
     ## $ SalePrice     <int> 208500, 181500, 223500, 140000, 250000, 143000, ...
 
-Look at the col names to find cool variables
---------------------------------------------
+Let's look at the features
+--------------------------
 
 ``` r
 df.train %>% 

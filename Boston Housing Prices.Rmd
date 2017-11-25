@@ -30,10 +30,11 @@ We'll check if our data meets the assumptions required by most multivariate tech
 
 Meaning, importing the goodies from `tidyverse` for easy data wrangling, `ggplot2` for some nice visualization and `broom` for making sure we don't miss anything while creating our models later on.
 
-```{r }
+```{r echo=FALSE}
 require(ggplot2)
 require(tidyverse)
 require(broom)
+require(reshape2)
 
 ```
 
@@ -119,9 +120,11 @@ segment.space <- c('PoolArea','PoolQC','Fence','MiscFeature', 'SalePrice')
 
 
 ```{r}
-df.train.segment.building <- df.train[,segment.building]
-df.train.segment.location <- df.train[,segment.location]
-df.train.segment.space <- df.train[,segment.space]
+df.train.segment.building <- df.train %>% select(segment.building)
+
+df.train.segment.location <- df.train %>% select(segment.location)
+
+df.train.segment.space <- df.train %>% select(segment.space)
 ```
 
 ###Creating a linear model between each variable in each segment to find 
@@ -129,31 +132,27 @@ df.train.segment.space <- df.train[,segment.space]
 Not sure yet wether to generate lm() first and then plot each model or create all plots with ggplot with lm() directely and then plot all with facet_grid…
 
 ```{r}
-#df.segment.building.model <- data.frame(variable = colnames(df.train.segment.building), model = 'na', rsq = 'na')
+df.train.segment.building.models <- df.train.segment.building %>% 
+  select(HouseStyle, SalePrice) %>% 
 
-#df.segment.location.model <- data.frame(variable = colnames(df.train.segment.location), model = 'na', rsq = 'na')
 
-#df.segment.space.model <- data.frame(variable = colnames(df.train.segment.space), model = 'na', rsq = 'na')
+by_country <- gapminder %>%
+  mutate(year1950 = year - 1950 ) %>%  # dataset starts at 1950
+  group_by(continent, country) %>%     
+  nest()                  # all columns is placed in a dataframe 
+                          # which is placed into a column "data"
 
-# Code copy + pasted from DataCamp to gen
-# multiple plots, maybe it's possible to gen models with purrr-package?
-# library(plyr)
-# my_plots <- dlply(mtcars, .(cyl), function(df){
-#   ggplot(df, aes(mpg, wt)) +
-#     geom_point() +
-#     xlim(range(mtcars$mpg)) +
-#     ylim(range(mtcars$wt)) +
-#     ggtitle(paste(df$cyl[1], 'cylinders'))
-# })
-# 
-# 
-# models <- by_country %>% 
-#   mutate(model = map(data, country_model)) %>%
-#   # model results are summarised in tidy dataframes using broom
-#   mutate(glance = map(model, broom::glance),
-#          rsq    = glance %>% map_dbl("r.squared"),
-#          tidy   = map(model, broom::tidy),
-#          augment= map(model, broom::augment))
+country_model <- function(df){
+  lm(lifeExp ~ year1950, data = df)
+}
+
+models <- by_country %>%
+  mutate(model = map(data, country_model)) %>%
+  # model results are summarised in tidy dataframes using broom
+  mutate(glance = map(model, broom::glance),
+         rsq    = glance %>% map_dbl("r.squared"),
+         tidy   = map(model, broom::tidy),
+         augment= map(model, broom::augment))
 
 ```
 
