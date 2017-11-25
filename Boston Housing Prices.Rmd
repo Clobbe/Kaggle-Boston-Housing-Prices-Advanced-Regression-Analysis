@@ -100,32 +100,33 @@ By following the recommendation from previous author we grouped variables into t
 * space
 
 ```{r echo = FALSE }
-#creating segment array's
-df.train <- df.train %>% 
-  mutate(segment = 'na')
+expectation.hi <- c("Neighborhood","Condition1","OverallQual",
+                    "OverallCond","YearBuilt","YearRemodAdd",
+                    "TotRmsAbvGrd","Fireplaces","YrSold","SalePrice")
 
-segment.building <- c('BldgType','HouseStyle','OverallQual','OverallCond','YearBuilt',
-                      'YearRemodAdd','RoofStyle','RoofMatl','Exterior1st','Exterior2nd',
-                      'MasVnrType','MasVnrArea','ExterQual','ExterCond','Foundation',
-                      'BsmtQual','BsmtCond','BsmtExposure','BsmtFinType1','BsmtFinSF1',
-                      'BsmtFinType2','BsmtFinSF2','BsmtUnfSF','TotalBsmtSF','Heating',
-                      'HeatingQC','CentralAir','Electrical','LowQualFinSF','GrLivArea',
-                      'BsmtFullBath','BsmtHalfBath','FullBath','HalfBath','BedroomAbvGr',
-                      'KitchenAbvGr','KitchenQual','TotRmsAbvGrd','Functional','Fireplaces',
-                      'FireplaceQu','GarageType','GarageYrBlt','GarageFinish','GarageCars',
-                      'GarageArea','GarageQual','GarageCond','PavedDrive','WoodDeckSF',
-                      'OpenPorchSF','EnclosedPorch','3SsnPorch','ScreenPorch','MiscVal','SalePrice')
+expectation.med <- c("MSZoning","LotArea","LandContour","Utilities","LotConfig",
+                     "BldgType","HouseStyle","RoofStyle","MasVnrType","MasVnrArea",
+                     "ExterQual","ExterCond","Foundation","BsmtQual","BsmtCond",
+                     "BsmtExposure","BsmtFinType1","BsmtFinSF1","BsmtFinType2",
+                     "BsmtFinSF2","BsmtUnfSF","TotalBsmtSF","1stFlrSF","2ndFlrSF",
+                     "LowQualFinSF","GrLivArea","BsmtFullBath","BsmtHalfBath","FullBath",
+                     "HalfBath","BedroomAbvGr","KitchenAbvGr","KitchenQual","FireplaceQu",
+                     "GarageType","GarageYrBlt","GarageFinish","GarageCars","GarageArea",
+                     "GarageQual","GarageCond","PavedDrive","WoodDeckSF","OpenPorchSF",
+                     "EnclosedPorch","3SsnPorch","ScreenPorch","PoolQC","MoSold","SaleType",
+                     "SaleCondition", "SalePrice")
 
-segment.location <- c('MSZoning','LandSlope','Neighborhood','Condition1','Condition2', 'SalePrice')
-segment.space <- c('PoolArea','PoolQC','Fence','MiscFeature', 'SalePrice')
 ```
 
 Setting the segmentet data frames
 
 ```{r}
-df.train.segment.building <- df.train %>% select(segment.building)
-df.train.segment.location <- df.train %>% select(segment.location)
-df.train.segment.space <- df.train %>% select(segment.space)
+df.train.hi <- df.train %>% select(expectation.hi)
+df.train.med <- df.train %>% select(expectation.med)
+
+require(GGally)
+ggpairs(df.train.hi, cardinality_threshold = 25)
+
 ```
 
 ###Creating a linear model between each variable in each segment to find 
