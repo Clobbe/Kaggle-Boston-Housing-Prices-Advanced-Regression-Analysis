@@ -95,11 +95,20 @@ We did some variable evaluation, tidious but very useful. It was done in a regul
 From the initial evaluation with determine that some variables are more interesting for houses and some for apartment houses. 
 
 By following the recommendation from previous author we grouped variables into the three categories:
-* building
-* location
-* space
+
+* `building`
+
+* `location`
+
+* `space`
+
+We then also evaluated how much influence each variable would have on the price. Classifying each variable with an expectation of either `Hi`, `Med` or `Low` influence.
+
+The problem is getting more and more tangible and now it's just about validating wether the selected variables indeed are positive correlated with an increase in price. 
 
 ```{r echo = FALSE }
+
+#setting which columns to filter out from the main dataset
 expectation.hi <- c("Neighborhood","Condition1","OverallQual",
                     "OverallCond","YearBuilt","YearRemodAdd",
                     "TotRmsAbvGrd","Fireplaces","YrSold","SalePrice")
@@ -118,71 +127,32 @@ expectation.med <- c("MSZoning","LotArea","LandContour","Utilities","LotConfig",
 
 ```
 
-Setting the segmentet data frames
 
-```{r}
+To get the overview and find which variables that correlate with increased price it's convenient to do a matrix of plot who just take care of everything and give us an image with everything we're interested in. 
+
+```{r echo = FALSE, eval= FALSE }
 df.train.hi <- df.train %>% select(expectation.hi)
 df.train.med <- df.train %>% select(expectation.med)
 
 require(GGally)
 ggpairs(df.train.hi, cardinality_threshold = 25)
-
 ```
 
-###Creating a linear model between each variable in each segment to find 
+###Variables expected to have 'Hi' influence
+![Correlation matrix plot for hi influence variables](https://dl.dropboxusercontent.com/s/bry1ahaxnyu1s2c/Screenshot%202017-11-25%2023.08.43.png)
+Looks like some of the variables we expected to have high influence are positively correlated with the price. The highlighted variables are:
 
-Not sure yet wether to generate lm() first and then plot each model or create all plots with ggplot with lm() directely and then plot all with facet_grid…
+*  `OverallQual` (*perhaps the most fluffy variable in this dataset - the overall quality of materials and finish*)
+
+*  `YearBuilt` (*the year when the house was built*)
+
+*  `YearRemodAdd` (*the year when the house last was remodule*)
+
+*  `TotRmsAbvGrd` (*the number of rooms above grade (bathrooms not included)*)
+
+
+
 
 ```{r}
 
-segment.building.correlations <- df.train.segment.building %>% 
-                                  select_if(is.numeric) %>%
-                                  map(~cor(x = . , y = df.train.segment.building$SalePrice, method = 'pearson')) %>%
-                                  as_data_frame() %>% 
-                                  t() %>% 
-                                  as.vector()
-
-segment.location.correlations <- df.train.segment.location %>% 
-                                  select_if(is.numeric) %>%
-                                  map(~cor(x = . , y = df.train.segment.location$SalePrice, method = 'pearson')) %>%
-                                  as_data_frame() %>% 
-                                  t() %>% 
-                                  as.vector()
-
-segment.space.correlations <- df.train.segment.space %>% 
-                                  select_if(is.numeric) %>%
-                                  map(~cor(x = . , y = df.train.segment.space$SalePrice, method = 'pearson')) %>%
-                                  as_data_frame() %>% 
-                                  t() %>% 
-                                  as.vector()
-
-df.segments <- bind_rows(df.segments, )
-
-df.segments.tmp <- data.frame(variable = df.train.segment.building %>% 
-                                      select_if(is.numeric) %>% 
-                                      colnames(),
-                  cor_values = segment.building.correlations,
-                  segment = 'building')
-                  
-                
-by_country <- gapminder %>%
-  mutate(year1950 = year - 1950 ) %>%  # dataset starts at 1950
-  group_by(continent, country) %>%     
-  nest()                  # all columns is placed in a dataframe 
-                          # which is placed into a column "data"
-
-country_model <- function(df){
-  lm(lifeExp ~ year1950, data = df)
-}
-
-models <- by_country %>%
-  mutate(model = map(data, country_model)) %>%
-  # model results are summarised in tidy dataframes using broom
-  mutate(glance = map(model, broom::glance),
-         rsq    = glance %>% map_dbl("r.squared"),
-         tidy   = map(model, broom::tidy),
-         augment= map(model, broom::augment))
-
 ```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

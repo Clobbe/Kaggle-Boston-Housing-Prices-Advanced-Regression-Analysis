@@ -20,15 +20,7 @@ Pick up the right toolset
 
 Meaning, importing the goodies from `tidyverse` for easy data wrangling, `ggplot2` for some nice visualization and `broom` for making sure we don't miss anything while creating our models later on.
 
-``` r
-require(ggplot2)
-```
-
     ## Loading required package: ggplot2
-
-``` r
-require(tidyverse)
-```
 
     ## Loading required package: tidyverse
 
@@ -43,11 +35,16 @@ require(tidyverse)
     ## ✖ dplyr::filter() masks stats::filter()
     ## ✖ dplyr::lag()    masks stats::lag()
 
-``` r
-require(broom)
-```
-
     ## Loading required package: broom
+
+    ## Loading required package: reshape2
+
+    ## 
+    ## Attaching package: 'reshape2'
+
+    ## The following object is masked from 'package:tidyr':
+    ## 
+    ##     smiths
 
 ``` r
 df.test.raw <- read_csv('test.csv', col_names = T)
@@ -350,44 +347,28 @@ We did some variable evaluation, tidious but very useful. It was done in a regul
 
 From the initial evaluation with determine that some variables are more interesting for houses and some for apartment houses.
 
-By following the recommendation from previous author we grouped variables into the three categories: \* building \* location \* space
+By following the recommendation from previous author we grouped variables into the three categories:
 
-``` r
-df.train.segment.building <- df.train[,segment.building]
-df.train.segment.location <- df.train[,segment.location]
-df.train.segment.space <- df.train[,segment.space]
-```
+-   `building`
 
-### Creating a linear model between each variable in each segment to find
+-   `location`
 
-Not sure yet wether to generate lm() first and then plot each model or create all plots with ggplot with lm() directely and then plot all with facet\_grid…
+-   `space`
 
-``` r
-#df.segment.building.model <- data.frame(variable = colnames(df.train.segment.building), model = 'na', rsq = 'na')
+We then also evaluated how much influence each variable would have on the price. Classifying each variable with an expectation of either `Hi`, `Med` or `Low` influence.
 
-#df.segment.location.model <- data.frame(variable = colnames(df.train.segment.location), model = 'na', rsq = 'na')
+The problem is getting more and more tangible and now it's just about validating wether the selected variables indeed are positive correlated with an increase in price.
 
-#df.segment.space.model <- data.frame(variable = colnames(df.train.segment.space), model = 'na', rsq = 'na')
+To get the overview and find which variables that correlate with increased price it's convenient to do a matrix of plot who just take care of everything and give us an image with everything we're interested in.
 
-# Code copy + pasted from DataCamp to gen
-# multiple plots, maybe it's possible to gen models with purrr-package?
-# library(plyr)
-# my_plots <- dlply(mtcars, .(cyl), function(df){
-#   ggplot(df, aes(mpg, wt)) +
-#     geom_point() +
-#     xlim(range(mtcars$mpg)) +
-#     ylim(range(mtcars$wt)) +
-#     ggtitle(paste(df$cyl[1], 'cylinders'))
-# })
-# 
-# 
-# models <- by_country %>% 
-#   mutate(model = map(data, country_model)) %>%
-#   # model results are summarised in tidy dataframes using broom
-#   mutate(glance = map(model, broom::glance),
-#          rsq    = glance %>% map_dbl("r.squared"),
-#          tidy   = map(model, broom::tidy),
-#          augment= map(model, broom::augment))
-```
+### Variables expected to have 'Hi' influence
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+![Correlation matrix plot for hi influence variables](https://dl.dropboxusercontent.com/s/bry1ahaxnyu1s2c/Screenshot%202017-11-25%2023.08.43.png) Looks like some of the variables we expected to have high influence are positively correlated with the price. The highlighted variables are:
+
+-   `OverallQual` (*perhaps the most fluffy variable in this dataset - the overall quality of materials and finish*)
+
+-   `YearBuilt` (*the year when the house was built*)
+
+-   `YearRemodAdd` (*the year when the house last was remodule*)
+
+-   `TotRmsAbvGrd` (*the number of rooms above grade (bathrooms not included)*)
