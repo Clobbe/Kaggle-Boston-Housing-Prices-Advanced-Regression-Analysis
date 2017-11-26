@@ -3,15 +3,18 @@ Kaggle Project : Boston Housing - Advanced Regression Techniques
 Clobbe Norman
 11/19/2017
 
+1.What are we dealing with?
+===========================
+
 Need to clean up this bulletlist later + write an introduction to the case and thank Pedro Marcelino for the inspiration and [guidance on his approach to this project](https://www.kaggle.com/pmarcelino/comprehensive-data-exploration-with-python)
 
-1.  **Understand the problem** We'll look at each variable and do a philosophical analysis about their meaning and importance for this problem.\*
+1.  **Understand the problem** We'll look at each feature and do a philosophical analysis about their meaning and importance for this problem.\*
 
-2.  **Univariable study** We'll just focus on the dependent variable ('SalePrice') and try to know a little bit more about it.
+2.  **Univariable study** We'll just focus on the dependent feature ('SalePrice') and try to know a little bit more about it.
 
-3.  **Multivariate study** We'll try to understand how the dependent variable and independent variables relate.
+3.  **Multivariate study** We'll try to understand how the dependent feature and independent features relate.
 
-4.  **Basic cleaning** We'll clean the dataset and handle the missing data, outliers and categorical variables.
+4.  **Basic cleaning** We'll clean the dataset and handle the missing data, outliers and categorical features.
 
 5.  **Test assumptions** We'll check if our data meets the assumptions required by most multivariate techniques.
 
@@ -20,96 +23,13 @@ Pick up the right toolset
 
 Meaning, importing the goodies from `tidyverse` for easy data wrangling, `ggplot2` for some nice visualization and `broom` for making sure we don't miss anything while creating our models later on.
 
-    ## Loading required package: ggplot2
-
-    ## Loading required package: tidyverse
-
-    ## ── Attaching packages ────────────────────────────────── tidyverse 1.2.1 ──
-
-    ## ✔ tibble  1.3.4     ✔ purrr   0.2.4
-    ## ✔ tidyr   0.7.2     ✔ dplyr   0.7.4
-    ## ✔ readr   1.1.1     ✔ stringr 1.2.0
-    ## ✔ tibble  1.3.4     ✔ forcats 0.2.0
-
-    ## ── Conflicts ───────────────────────────────────── tidyverse_conflicts() ──
-    ## ✖ dplyr::filter() masks stats::filter()
-    ## ✖ dplyr::lag()    masks stats::lag()
-
-    ## Loading required package: broom
-
-    ## Loading required package: reshape2
-
-    ## 
-    ## Attaching package: 'reshape2'
-
-    ## The following object is masked from 'package:tidyr':
-    ## 
-    ##     smiths
-
 ``` r
+require(ggplot2)
+require(tidyverse)
+
 df.test.raw <- read_csv('test.csv', col_names = T)
-```
-
-    ## Parsed with column specification:
-    ## cols(
-    ##   .default = col_character(),
-    ##   Id = col_integer(),
-    ##   MSSubClass = col_integer(),
-    ##   LotFrontage = col_integer(),
-    ##   LotArea = col_integer(),
-    ##   OverallQual = col_integer(),
-    ##   OverallCond = col_integer(),
-    ##   YearBuilt = col_integer(),
-    ##   YearRemodAdd = col_integer(),
-    ##   MasVnrArea = col_integer(),
-    ##   BsmtFinSF1 = col_integer(),
-    ##   BsmtFinSF2 = col_integer(),
-    ##   BsmtUnfSF = col_integer(),
-    ##   TotalBsmtSF = col_integer(),
-    ##   `1stFlrSF` = col_integer(),
-    ##   `2ndFlrSF` = col_integer(),
-    ##   LowQualFinSF = col_integer(),
-    ##   GrLivArea = col_integer(),
-    ##   BsmtFullBath = col_integer(),
-    ##   BsmtHalfBath = col_integer(),
-    ##   FullBath = col_integer()
-    ##   # ... with 17 more columns
-    ## )
-
-    ## See spec(...) for full column specifications.
-
-``` r
 df.train.raw <- read_csv('train.csv', col_names = T)
-```
 
-    ## Parsed with column specification:
-    ## cols(
-    ##   .default = col_character(),
-    ##   Id = col_integer(),
-    ##   MSSubClass = col_integer(),
-    ##   LotFrontage = col_integer(),
-    ##   LotArea = col_integer(),
-    ##   OverallQual = col_integer(),
-    ##   OverallCond = col_integer(),
-    ##   YearBuilt = col_integer(),
-    ##   YearRemodAdd = col_integer(),
-    ##   MasVnrArea = col_integer(),
-    ##   BsmtFinSF1 = col_integer(),
-    ##   BsmtFinSF2 = col_integer(),
-    ##   BsmtUnfSF = col_integer(),
-    ##   TotalBsmtSF = col_integer(),
-    ##   `1stFlrSF` = col_integer(),
-    ##   `2ndFlrSF` = col_integer(),
-    ##   LowQualFinSF = col_integer(),
-    ##   GrLivArea = col_integer(),
-    ##   BsmtFullBath = col_integer(),
-    ##   BsmtHalfBath = col_integer(),
-    ##   FullBath = col_integer()
-    ##   # ... with 18 more columns
-    ## )
-    ## See spec(...) for full column specifications.
-
-``` r
 df.test <- df.test.raw
 df.train <- df.train.raw
 ```
@@ -205,9 +125,9 @@ df.train %>%
     ## $ SaleCondition <chr> "Normal", "Normal", "Normal", "Abnorml", "Normal...
     ## $ SalePrice     <int> 208500, 181500, 223500, 140000, 250000, 143000, ...
 
-Wow! That's impressive - 1,460 observations and 81 variables.
+Wow! That's impressive - 1,460 observations and 81 features.
 
-From this quick overview of the dataset it seems like R interpret all the text varibles as `<chr>`, character variables. Something which will mess up later when we want to build our model and doing some visualization.
+From this quick overview of the dataset it seems like R interpret all the text varibles as `<chr>`, character features. Something which will mess up later when we want to build our model and doing some visualization.
 
 Let's fix that by turning these characters into proper factors with levels instead.
 
@@ -221,7 +141,7 @@ df.train <- df.train %>%
   as.data.frame()
 ```
 
-Let's have a look now again at the variables.
+Let's have a look now again at the features.
 
 ``` r
 df.train %>%
@@ -236,81 +156,12 @@ df.train %>%
     ## $ LotFrontage   <int> 65, 80, 68, 60, 84, 85, 75, NA, 51, 50, 70, 85, ...
     ## $ LotArea       <int> 8450, 9600, 11250, 9550, 14260, 14115, 10084, 10...
     ## $ Street        <fctr> Pave, Pave, Pave, Pave, Pave, Pave, Pave, Pave,...
-    ## $ Alley         <fctr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,...
-    ## $ LotShape      <fctr> Reg, Reg, IR1, IR1, IR1, IR1, Reg, IR1, Reg, Re...
-    ## $ LandContour   <fctr> Lvl, Lvl, Lvl, Lvl, Lvl, Lvl, Lvl, Lvl, Lvl, Lv...
-    ## $ Utilities     <fctr> AllPub, AllPub, AllPub, AllPub, AllPub, AllPub,...
-    ## $ LotConfig     <fctr> Inside, FR2, Inside, Corner, FR2, Inside, Insid...
-    ## $ LandSlope     <fctr> Gtl, Gtl, Gtl, Gtl, Gtl, Gtl, Gtl, Gtl, Gtl, Gt...
-    ## $ Neighborhood  <fctr> CollgCr, Veenker, CollgCr, Crawfor, NoRidge, Mi...
-    ## $ Condition1    <fctr> Norm, Feedr, Norm, Norm, Norm, Norm, Norm, PosN...
-    ## $ Condition2    <fctr> Norm, Norm, Norm, Norm, Norm, Norm, Norm, Norm,...
-    ## $ BldgType      <fctr> 1Fam, 1Fam, 1Fam, 1Fam, 1Fam, 1Fam, 1Fam, 1Fam,...
-    ## $ HouseStyle    <fctr> 2Story, 1Story, 2Story, 2Story, 2Story, 1.5Fin,...
-    ## $ OverallQual   <int> 7, 6, 7, 7, 8, 5, 8, 7, 7, 5, 5, 9, 5, 7, 6, 7, ...
-    ## $ OverallCond   <int> 5, 8, 5, 5, 5, 5, 5, 6, 5, 6, 5, 5, 6, 5, 5, 8, ...
-    ## $ YearBuilt     <int> 2003, 1976, 2001, 1915, 2000, 1993, 2004, 1973, ...
-    ## $ YearRemodAdd  <int> 2003, 1976, 2002, 1970, 2000, 1995, 2005, 1973, ...
-    ## $ RoofStyle     <fctr> Gable, Gable, Gable, Gable, Gable, Gable, Gable...
-    ## $ RoofMatl      <fctr> CompShg, CompShg, CompShg, CompShg, CompShg, Co...
-    ## $ Exterior1st   <fctr> VinylSd, MetalSd, VinylSd, Wd Sdng, VinylSd, Vi...
-    ## $ Exterior2nd   <fctr> VinylSd, MetalSd, VinylSd, Wd Shng, VinylSd, Vi...
-    ## $ MasVnrType    <fctr> BrkFace, None, BrkFace, None, BrkFace, None, St...
-    ## $ MasVnrArea    <int> 196, 0, 162, 0, 350, 0, 186, 240, 0, 0, 0, 286, ...
-    ## $ ExterQual     <fctr> Gd, TA, Gd, TA, Gd, TA, Gd, TA, TA, TA, TA, Ex,...
-    ## $ ExterCond     <fctr> TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, TA,...
-    ## $ Foundation    <fctr> PConc, CBlock, PConc, BrkTil, PConc, Wood, PCon...
-    ## $ BsmtQual      <fctr> Gd, Gd, Gd, TA, Gd, Gd, Ex, Gd, TA, TA, TA, Ex,...
-    ## $ BsmtCond      <fctr> TA, TA, TA, Gd, TA, TA, TA, TA, TA, TA, TA, TA,...
-    ## $ BsmtExposure  <fctr> No, Gd, Mn, No, Av, No, Av, Mn, No, No, No, No,...
-    ## $ BsmtFinType1  <fctr> GLQ, ALQ, GLQ, ALQ, GLQ, GLQ, GLQ, ALQ, Unf, GL...
-    ## $ BsmtFinSF1    <int> 706, 978, 486, 216, 655, 732, 1369, 859, 0, 851,...
-    ## $ BsmtFinType2  <fctr> Unf, Unf, Unf, Unf, Unf, Unf, Unf, BLQ, Unf, Un...
-    ## $ BsmtFinSF2    <int> 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0,...
-    ## $ BsmtUnfSF     <int> 150, 284, 434, 540, 490, 64, 317, 216, 952, 140,...
-    ## $ TotalBsmtSF   <int> 856, 1262, 920, 756, 1145, 796, 1686, 1107, 952,...
-    ## $ Heating       <fctr> GasA, GasA, GasA, GasA, GasA, GasA, GasA, GasA,...
-    ## $ HeatingQC     <fctr> Ex, Ex, Ex, Gd, Ex, Ex, Ex, Ex, Gd, Ex, Ex, Ex,...
-    ## $ CentralAir    <fctr> Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y,...
-    ## $ Electrical    <fctr> SBrkr, SBrkr, SBrkr, SBrkr, SBrkr, SBrkr, SBrkr...
-    ## $ X1stFlrSF     <int> 856, 1262, 920, 961, 1145, 796, 1694, 1107, 1022...
-    ## $ X2ndFlrSF     <int> 854, 0, 866, 756, 1053, 566, 0, 983, 752, 0, 0, ...
-    ## $ LowQualFinSF  <int> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...
-    ## $ GrLivArea     <int> 1710, 1262, 1786, 1717, 2198, 1362, 1694, 2090, ...
-    ## $ BsmtFullBath  <int> 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, ...
-    ## $ BsmtHalfBath  <int> 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...
-    ## $ FullBath      <int> 2, 2, 2, 1, 2, 1, 2, 2, 2, 1, 1, 3, 1, 2, 1, 1, ...
-    ## $ HalfBath      <int> 1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, ...
-    ## $ BedroomAbvGr  <int> 3, 3, 3, 3, 4, 1, 3, 3, 2, 2, 3, 4, 2, 3, 2, 2, ...
-    ## $ KitchenAbvGr  <int> 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, ...
-    ## $ KitchenQual   <fctr> Gd, TA, Gd, Gd, Gd, TA, Gd, TA, TA, TA, TA, Ex,...
-    ## $ TotRmsAbvGrd  <int> 8, 6, 6, 7, 9, 5, 7, 7, 8, 5, 5, 11, 4, 7, 5, 5,...
-    ## $ Functional    <fctr> Typ, Typ, Typ, Typ, Typ, Typ, Typ, Typ, Min1, T...
-    ## $ Fireplaces    <int> 0, 1, 1, 1, 1, 0, 1, 2, 2, 2, 0, 2, 0, 1, 1, 0, ...
-    ## $ FireplaceQu   <fctr> NA, TA, TA, Gd, TA, NA, Gd, TA, TA, TA, NA, Gd,...
-    ## $ GarageType    <fctr> Attchd, Attchd, Attchd, Detchd, Attchd, Attchd,...
-    ## $ GarageYrBlt   <int> 2003, 1976, 2001, 1998, 2000, 1993, 2004, 1973, ...
-    ## $ GarageFinish  <fctr> RFn, RFn, RFn, Unf, RFn, Unf, RFn, RFn, Unf, RF...
-    ## $ GarageCars    <int> 2, 2, 2, 3, 3, 2, 2, 2, 2, 1, 1, 3, 1, 3, 1, 2, ...
-    ## $ GarageArea    <int> 548, 460, 608, 642, 836, 480, 636, 484, 468, 205...
-    ## $ GarageQual    <fctr> TA, TA, TA, TA, TA, TA, TA, TA, Fa, Gd, TA, TA,...
-    ## $ GarageCond    <fctr> TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, TA,...
-    ## $ PavedDrive    <fctr> Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y,...
-    ## $ WoodDeckSF    <int> 0, 298, 0, 0, 192, 40, 255, 235, 90, 0, 0, 147, ...
-    ## $ OpenPorchSF   <int> 61, 0, 42, 35, 84, 30, 57, 204, 0, 4, 0, 21, 0, ...
-    ## $ EnclosedPorch <int> 0, 0, 0, 272, 0, 0, 0, 228, 205, 0, 0, 0, 0, 0, ...
-    ## $ X3SsnPorch    <int> 0, 0, 0, 0, 0, 320, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0...
-    ## $ ScreenPorch   <int> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 176, 0, 0, 0...
-    ## $ PoolArea      <int> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...
-    ## $ PoolQC        <fctr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,...
-    ## $ Fence         <fctr> NA, NA, NA, NA, NA, MnPrv, NA, NA, NA, NA, NA, ...
-    ## $ MiscFeature   <fctr> NA, NA, NA, NA, NA, Shed, NA, Shed, NA, NA, NA,...
-    ## $ MiscVal       <int> 0, 0, 0, 0, 0, 700, 0, 350, 0, 0, 0, 0, 0, 0, 0,...
-    ## $ MoSold        <int> 2, 5, 9, 2, 12, 10, 8, 11, 4, 1, 2, 7, 9, 8, 5, ...
-    ## $ YrSold        <int> 2008, 2007, 2008, 2006, 2008, 2009, 2007, 2009, ...
+    ...
     ## $ SaleType      <fctr> WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, New...
     ## $ SaleCondition <fctr> Normal, Normal, Normal, Abnorml, Normal, Normal...
     ## $ SalePrice     <int> 208500, 181500, 223500, 140000, 250000, 143000, ...
+
+*(yes, I intentionally cut the output so you didn't have to scroll as much again)*
 
 Let's look at the features
 --------------------------
@@ -343,11 +194,11 @@ df.train %>%
     ## [77] "X2ndFlrSF"     "X3SsnPorch"    "YearBuilt"     "YearRemodAdd" 
     ## [81] "YrSold"
 
-We did some variable evaluation, tidious but very useful. It was done in a regular [Google Spreadsheet.](https://docs.google.com/spreadsheets/d/16RMnBO7TQLbaJIiphSrcFAlJq7ewtXyojskUUsE__FM/edit?usp=sharing)
+We did some feature evaluation, tidious but very useful. It was done in a regular [Google Spreadsheet.](https://docs.google.com/spreadsheets/d/16RMnBO7TQLbaJIiphSrcFAlJq7ewtXyojskUUsE__FM/edit?usp=sharing)
 
-From the initial evaluation with determine that some variables are more interesting for houses and some for apartment houses.
+From the initial evaluation with determine that some features are more interesting for houses and some for apartment houses.
 
-By following the recommendation from previous author we grouped variables into the three categories:
+By following the recommendation from previous author we grouped features into the three categories:
 
 -   `building`
 
@@ -355,20 +206,148 @@ By following the recommendation from previous author we grouped variables into t
 
 -   `space`
 
-We then also evaluated how much influence each variable would have on the price. Classifying each variable with an expectation of either `Hi`, `Med` or `Low` influence.
+We then also evaluated how much influence each feature would have on the price. Classifying each feature with an expectation of either `Hi`, `Med` or `Low` influence.
 
-The problem is getting more and more tangible and now it's just about validating wether the selected variables indeed are positive correlated with an increase in price.
+The problem is getting more and more tangible and now it's just about validating wether the selected features indeed are positive correlated with an increase in price.
 
-To get the overview and find which variables that correlate with increased price it's convenient to do a matrix of plot who just take care of everything and give us an image with everything we're interested in.
+To get the overview and find which features that correlate with increased price it's convenient to do a matrix of plot who just take care of everything and give us an image with everything we're interested in.
 
-### Variables expected to have 'Hi' influence
+### Features expected to have 'Hi' influence
 
-![Correlation matrix plot for hi influence variables](https://dl.dropboxusercontent.com/s/bry1ahaxnyu1s2c/Screenshot%202017-11-25%2023.08.43.png) Looks like some of the variables we expected to have high influence are positively correlated with the price. The highlighted variables are:
+![Correlation matrix plot for hi influence features](https://dl.dropboxusercontent.com/s/bry1ahaxnyu1s2c/Screenshot%202017-11-25%2023.08.43.png) Looks like some of the features we expected to have high influence are positively correlated with the price. The highlighted features are:
 
--   `OverallQual` (*perhaps the most fluffy variable in this dataset - the overall quality of materials and finish*)
+-   `OverallQual` (*perhaps the most fluffy feature in this dataset - the overall quality of materials and finish*)
 
 -   `YearBuilt` (*the year when the house was built*)
 
 -   `YearRemodAdd` (*the year when the house last was remodule*)
 
 -   `TotRmsAbvGrd` (*the number of rooms above grade (bathrooms not included)*)
+
+2.What does target varible `SalePrice` look like
+================================================
+
+The scope for this project is to build a model that from a set of features (which we're currently trying to find) will be the basis for a model which in turn can predict the price - SalePrice.
+
+Let's find out what we know about `SalePrice`.
+
+``` r
+df.train %>% 
+  select(SalePrice) %>% 
+  summary()
+```
+
+    ##    SalePrice     
+    ##  Min.   : 34900  
+    ##  1st Qu.:129975  
+    ##  Median :163000  
+    ##  Mean   :180921  
+    ##  3rd Qu.:214000  
+    ##  Max.   :755000
+
+### First off - this looks perfect!
+
+There's no zero's, meaning that the feature don't have any outliers that could later on affect our model.
+
+Let's have a look at the distribution of `SalePrice`.
+
+``` r
+df.train %>% 
+  ggplot(aes(x = SalePrice)) +
+  geom_histogram(
+      aes(y = ..density..),
+      fill = 'blue',
+      alpha = 0.4) +
+  geom_density(alpha = 0, size = 1)
+```
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+![](Boston_Housing_Prices_files/figure-markdown_github/unnamed-chunk-10-1.png)
+
+Seems like we're dealing with a right skewed distribution, meaning it's deviating from a good ole normal distribution.
+
+Let's find out just how skewed the distribution is.
+
+``` r
+require(moments)
+```
+
+    ## Loading required package: moments
+
+``` r
+df.train %>% 
+  select(SalePrice) %>% 
+  summarise(
+      Skewness = skewness(SalePrice),
+      Kurtosis = kurtosis(SalePrice)
+  )
+```
+
+    ##   Skewness Kurtosis
+    ## 1 1.880941 9.509812
+
+Let's dig deeper into the relationship
+======================================
+
+So up until now we've only looked at the relationship between `SalePrice` and numeric features. What about the categorical feature `OverallQual`? We already know that's it's related with `SalePrice` but not how much.
+
+    ## Loading required package: RColorBrewer
+
+``` r
+df.train %>% 
+  ggplot(aes(x = as.factor(OverallQual), y = SalePrice, fill = as.factor(OverallQual))) + 
+    geom_boxplot(outlier.alpha = 0.3,
+                 outlier.stroke = 0.5) +
+  
+    theme(panel.grid.major = element_blank(),
+          legend.position="none") +
+    
+  xlab('OverallQual')
+```
+
+![](Boston_Housing_Prices_files/figure-markdown_github/unnamed-chunk-13-1.png)
+
+Well, this is nothing new but now we know how the `Overall Quality` is associated with `SalePrice`
+
+Let's dig deeper on the second categorical feature
+
+``` r
+df.train %>% 
+  ggplot(aes(x = as.factor(YearBuilt), y = SalePrice, fill = as.factor(YearBuilt))) + 
+    geom_boxplot(alpha = 0.8,
+                 outlier.alpha = 0.6,
+                 position = 'jitter',
+                 color = NA) +
+  
+    geom_smooth(aes(group=1),
+                method = "lm",
+                se=FALSE,
+                color="black") +
+  
+  theme(panel.grid.major = element_blank(),
+        legend.position="none",
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_blank()) +
+  
+  xlab('YearBuilt')
+```
+
+![](Boston_Housing_Prices_files/figure-markdown_github/unnamed-chunk-14-1.png)
+
+#### Nice colors! But what does it tell us?
+
+As seen above the black trendline helps us to determine that there is a positive association between `SalePrice` and feature `YearBuilt`.
+
+### So to sum things up…
+
+We've now found that:
+
+-   `YearBuilt`, `OverallQual`, `YearRemodAdd` and `TotRmsAbvGrd` are all features that's lineraly related with `SalePrice` .
+
+> *"But, hey! That's only 4 features out of 81 available. Don't you miss out on a lot of potential features that could have siginificant affect on the target?"*
+
+In Pedro's guide he refer to that the trick for this particular case seems to be `feature selction` rather than `feature engineering`. And the selection of these features was soley based on intuition, in the next section we'll approach this problem a bit more objective as one should as an aspiring data scientist.
+
+3.
+==

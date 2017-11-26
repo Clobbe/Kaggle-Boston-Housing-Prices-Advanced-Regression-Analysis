@@ -9,19 +9,21 @@ output: github_document
 knitr::opts_chunk$set(error = TRUE)
 ```
 
+# 1.What are we dealing with?
 Need to clean up this bulletlist later + write an introduction to the case and thank Pedro Marcelino for the inspiration and [guidance on his approach to this project](https://www.kaggle.com/pmarcelino/comprehensive-data-exploration-with-python)
 
+
 1. **Understand the problem**
-We'll look at each variable and do a philosophical analysis about their meaning and importance for this problem.*
+We'll look at each feature and do a philosophical analysis about their meaning and importance for this problem.*
 
 2. **Univariable study**
-We'll just focus on the dependent variable ('SalePrice') and try to know a little bit more about it.
+We'll just focus on the dependent feature ('SalePrice') and try to know a little bit more about it.
 
 3. **Multivariate study**
-We'll try to understand how the dependent variable and independent variables relate.
+We'll try to understand how the dependent feature and independent features relate.
 
 4. **Basic cleaning**
-We'll clean the dataset and handle the missing data, outliers and categorical variables.
+We'll clean the dataset and handle the missing data, outliers and categorical features.
 
 5. **Test assumptions**
 We'll check if our data meets the assumptions required by most multivariate techniques.
@@ -33,8 +35,6 @@ Meaning, importing the goodies from `tidyverse` for easy data wrangling, `ggplot
 ```{r echo=FALSE}
 require(ggplot2)
 require(tidyverse)
-require(reshape2)
-
 ```
 
 ```{r }
@@ -55,9 +55,9 @@ df.train %>%
 ```
 
 Wow!
-That's impressive - 1,460 observations and 81 variables.
+That's impressive - 1,460 observations and 81 features.
 
-From this quick overview of the dataset it seems like R interpret all the text varibles as `<chr>`, character variables. Something which will mess up later when we want to build our model and doing some visualization.
+From this quick overview of the dataset it seems like R interpret all the text varibles as `<chr>`, character features. Something which will mess up later when we want to build our model and doing some visualization.
 
 Let's fix that by turning these characters into proper factors with levels instead.
 
@@ -72,7 +72,7 @@ df.train <- df.train %>%
   as.data.frame()
 ```
 
-Let's have a look now again at the variables.
+Let's have a look now again at the features.
 
 ```{r }
 df.train %>%
@@ -88,11 +88,11 @@ df.train %>%
   colnames() %>% 
   sort()
 ```
-We did some variable evaluation, tidious but very useful. It was done in a regular [Google Spreadsheet.](https://docs.google.com/spreadsheets/d/16RMnBO7TQLbaJIiphSrcFAlJq7ewtXyojskUUsE__FM/edit?usp=sharing)
+We did some feature evaluation, tidious but very useful. It was done in a regular [Google Spreadsheet.](https://docs.google.com/spreadsheets/d/16RMnBO7TQLbaJIiphSrcFAlJq7ewtXyojskUUsE__FM/edit?usp=sharing)
 
-From the initial evaluation with determine that some variables are more interesting for houses and some for apartment houses. 
+From the initial evaluation with determine that some features are more interesting for houses and some for apartment houses. 
 
-By following the recommendation from previous author we grouped variables into the three categories:
+By following the recommendation from previous author we grouped features into the three categories:
 
 * `building`
 
@@ -100,9 +100,9 @@ By following the recommendation from previous author we grouped variables into t
 
 * `space`
 
-We then also evaluated how much influence each variable would have on the price. Classifying each variable with an expectation of either `Hi`, `Med` or `Low` influence.
+We then also evaluated how much influence each feature would have on the price. Classifying each feature with an expectation of either `Hi`, `Med` or `Low` influence.
 
-The problem is getting more and more tangible and now it's just about validating wether the selected variables indeed are positive correlated with an increase in price. 
+The problem is getting more and more tangible and now it's just about validating wether the selected features indeed are positive correlated with an increase in price. 
 
 ```{r echo = FALSE }
 
@@ -113,7 +113,7 @@ expectation.hi <- c("Neighborhood","Condition1","OverallQual",
 ```
 
 
-To get the overview and find which variables that correlate with increased price it's convenient to do a matrix of plot who just take care of everything and give us an image with everything we're interested in. 
+To get the overview and find which features that correlate with increased price it's convenient to do a matrix of plot who just take care of everything and give us an image with everything we're interested in. 
 
 ```{r echo = FALSE, eval= FALSE }
 df.train.hi <- df.train %>% select(expectation.hi)
@@ -123,11 +123,11 @@ require(GGally)
 ggpairs(df.train.hi, cardinality_threshold = 25)
 ```
 
-###Variables expected to have 'Hi' influence
-![Correlation matrix plot for hi influence variables](https://dl.dropboxusercontent.com/s/bry1ahaxnyu1s2c/Screenshot%202017-11-25%2023.08.43.png)
-Looks like some of the variables we expected to have high influence are positively correlated with the price. The highlighted variables are:
+###Features expected to have 'Hi' influence
+![Correlation matrix plot for hi influence features](https://dl.dropboxusercontent.com/s/bry1ahaxnyu1s2c/Screenshot%202017-11-25%2023.08.43.png)
+Looks like some of the features we expected to have high influence are positively correlated with the price. The highlighted features are:
 
-*  `OverallQual` (*perhaps the most fluffy variable in this dataset - the overall quality of materials and finish*)
+*  `OverallQual` (*perhaps the most fluffy feature in this dataset - the overall quality of materials and finish*)
 
 *  `YearBuilt` (*the year when the house was built*)
 
@@ -138,7 +138,7 @@ Looks like some of the variables we expected to have high influence are positive
 
 #2.What does target varible `SalePrice` look like
 
-The scope for this project is to build a model that from a set of variables (which we're currently trying to find) will be the basis for a model which in turn can predict the price - SalePrice.
+The scope for this project is to build a model that from a set of features (which we're currently trying to find) will be the basis for a model which in turn can predict the price - SalePrice.
 
 
 Let's find out what we know about `SalePrice`. 
@@ -151,7 +151,7 @@ df.train %>%
 
 ###First off - this looks perfect!
 
-There's no zero's, meaning that the variable don't have any outliers that could later on affect our model.
+There's no zero's, meaning that the feature don't have any outliers that could later on affect our model.
 
 Let's have a look at the distribution of `SalePrice`.
 
@@ -165,12 +165,86 @@ df.train %>%
   geom_density(alpha = 0, size = 1)
 ```
 
-Seems like we're dealing with a left skewed distribution, meaning it's deviate from a good ole normal distribution.
+Seems like we're dealing with a right skewed distribution, meaning it's deviating from a good ole normal distribution.
 
 Let's find out just how skewed the distribution is.
 
+```{r echo = TRUE}
+require(moments)
+
+df.train %>% 
+  select(SalePrice) %>% 
+  summarise(
+      Skewness = skewness(SalePrice),
+      Kurtosis = kurtosis(SalePrice)
+  )
+```
+
+#Let's dig deeper into the relationship
+
+So up until now we've only looked at the relationship between `SalePrice` and numeric features. What about the categorical feature `OverallQual`? We already know that's it's related with `SalePrice` but not how much.
+
+```{r echo = FALSE}
+require(RColorBrewer)
+colors <- brewer.pal(11, 'Spectral')
+```
+
+```{r}
+df.train %>% 
+  ggplot(aes(x = as.factor(OverallQual), y = SalePrice, fill = as.factor(OverallQual))) + 
+    geom_boxplot(outlier.alpha = 0.3,
+                 outlier.stroke = 0.5) +
+  
+    theme(panel.grid.major = element_blank(),
+          legend.position="none") +
+    
+  xlab('OverallQual')
+```
+
+Well, this is nothing new but now we know how the `Overall Quality` is associated with `SalePrice`
+
+
+Let's dig deeper on the second categorical feature 
+
 ```{r}
 
+df.train %>% 
+  ggplot(aes(x = as.factor(YearBuilt), y = SalePrice, fill = as.factor(YearBuilt))) + 
+    geom_boxplot(alpha = 0.8,
+                 outlier.alpha = 0.6,
+                 position = 'jitter',
+                 color = NA) +
+  
+    geom_smooth(aes(group=1),
+                method = "lm",
+                se=FALSE,
+                color="black") +
+  
+  theme(panel.grid.major = element_blank(),
+        legend.position="none",
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_blank()) +
+  
+  xlab('YearBuilt')
 
 ```
 
+####Nice colors! But what does it tell us?
+
+As seen above the black trendline helps us to determine that there is a positive association between `SalePrice` and feature `YearBuilt`. 
+
+
+
+###So to sum things up…
+
+We've now found that:
+
+* `YearBuilt`, `OverallQual`, `YearRemodAdd` and `TotRmsAbvGrd` are all features that's lineraly related with `SalePrice` .
+
+
+> *"But, hey! That's only 4 features out of 81 available. Don't you miss out on a lot of potential features that could have siginificant affect on the target?"*
+
+In Pedro's guide he refer to that the trick for this particular case seems to be `feature selction` rather than `feature engineering`. And the selection of these features was soley based on intuition, in the next section we'll approach this problem a bit more objective as one should as an aspiring data scientist.
+
+
+#3. 
