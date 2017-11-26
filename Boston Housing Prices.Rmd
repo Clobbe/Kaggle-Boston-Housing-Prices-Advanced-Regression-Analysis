@@ -33,7 +33,6 @@ Meaning, importing the goodies from `tidyverse` for easy data wrangling, `ggplot
 ```{r echo=FALSE}
 require(ggplot2)
 require(tidyverse)
-require(broom)
 require(reshape2)
 
 ```
@@ -88,7 +87,6 @@ df.train %>%
 df.train %>% 
   colnames() %>% 
   sort()
-
 ```
 We did some variable evaluation, tidious but very useful. It was done in a regular [Google Spreadsheet.](https://docs.google.com/spreadsheets/d/16RMnBO7TQLbaJIiphSrcFAlJq7ewtXyojskUUsE__FM/edit?usp=sharing)
 
@@ -112,19 +110,6 @@ The problem is getting more and more tangible and now it's just about validating
 expectation.hi <- c("Neighborhood","Condition1","OverallQual",
                     "OverallCond","YearBuilt","YearRemodAdd",
                     "TotRmsAbvGrd","Fireplaces","YrSold","SalePrice")
-
-expectation.med <- c("MSZoning","LotArea","LandContour","Utilities","LotConfig",
-                     "BldgType","HouseStyle","RoofStyle","MasVnrType","MasVnrArea",
-                     "ExterQual","ExterCond","Foundation","BsmtQual","BsmtCond",
-                     "BsmtExposure","BsmtFinType1","BsmtFinSF1","BsmtFinType2",
-                     "BsmtFinSF2","BsmtUnfSF","TotalBsmtSF","1stFlrSF","2ndFlrSF",
-                     "LowQualFinSF","GrLivArea","BsmtFullBath","BsmtHalfBath","FullBath",
-                     "HalfBath","BedroomAbvGr","KitchenAbvGr","KitchenQual","FireplaceQu",
-                     "GarageType","GarageYrBlt","GarageFinish","GarageCars","GarageArea",
-                     "GarageQual","GarageCond","PavedDrive","WoodDeckSF","OpenPorchSF",
-                     "EnclosedPorch","3SsnPorch","ScreenPorch","PoolQC","MoSold","SaleType",
-                     "SaleCondition", "SalePrice")
-
 ```
 
 
@@ -151,8 +136,41 @@ Looks like some of the variables we expected to have high influence are positive
 *  `TotRmsAbvGrd` (*the number of rooms above grade (bathrooms not included)*)
 
 
+#2.What does target varible `SalePrice` look like
 
+The scope for this project is to build a model that from a set of variables (which we're currently trying to find) will be the basis for a model which in turn can predict the price - SalePrice.
+
+
+Let's find out what we know about `SalePrice`. 
+
+```{r }
+df.train %>% 
+  select(SalePrice) %>% 
+  summary()
+```
+
+###First off - this looks perfect!
+
+There's no zero's, meaning that the variable don't have any outliers that could later on affect our model.
+
+Let's have a look at the distribution of `SalePrice`.
+
+```{r}
+df.train %>% 
+  ggplot(aes(x = SalePrice)) +
+  geom_histogram(
+      aes(y = ..density..),
+      fill = 'blue',
+      alpha = 0.4) +
+  geom_density(alpha = 0, size = 1)
+```
+
+Seems like we're dealing with a left skewed distribution, meaning it's deviate from a good ole normal distribution.
+
+Let's find out just how skewed the distribution is.
 
 ```{r}
 
+
 ```
+
