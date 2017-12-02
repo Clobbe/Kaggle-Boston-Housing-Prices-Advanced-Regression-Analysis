@@ -14,16 +14,16 @@ Need to clean up this bulletlist later + write an introduction to the case and t
 
 
 1. **Understand the problem**
-We'll look at each feature and do a philosophical analysis about their meaning and importance for this problem.*
+We'll look at each variable and do a philosophical analysis about their meaning and importance for this problem.*
 
 2. **Univariable study**
-We'll just focus on the dependent feature ('SalePrice') and try to know a little bit more about it.
+We'll just focus on the dependent variable ('SalePrice') and try to know a little bit more about it.
 
 3. **Multivariate study**
-We'll try to understand how the dependent feature and independent features relate.
+We'll try to understand how the dependent variable and independent variables relate.
 
 4. **Basic cleaning**
-We'll clean the dataset and handle the missing data, outliers and categorical features.
+We'll clean the dataset and handle the missing data, outliers and categorical variables.
 
 5. **Test assumptions**
 We'll check if our data meets the assumptions required by most multivariate techniques.
@@ -55,9 +55,9 @@ df.train %>%
 ```
 
 Wow!
-That's impressive - 1,460 observations and 81 features.
+That's impressive - 1,460 observations and 81 variables.
 
-From this quick overview of the dataset it seems like R interpret all the text varibles as `<chr>`, character features. Something which will mess up later when we want to build our model and doing some visualization.
+From this quick overview of the dataset it seems like R interpret all the text varibles as `<chr>`, character variables. Something which will mess up later when we want to build our model and doing some visualization.
 
 Let's fix that by turning these characters into proper factors with levels instead.
 
@@ -72,7 +72,7 @@ df.train <- df.train %>%
   as.data.frame()
 ```
 
-Let's have a look now again at the features.
+Let's have a look now again at the variables.
 
 ```{r }
 df.train %>%
@@ -82,17 +82,17 @@ df.train %>%
 
 
 
-##Let's look at the features
+##Let's look at the variables
 ```{r }
 df.train %>% 
   colnames() %>% 
   sort()
 ```
-We did some feature evaluation, tidious but very useful. It was done in a regular [Google Spreadsheet.](https://docs.google.com/spreadsheets/d/16RMnBO7TQLbaJIiphSrcFAlJq7ewtXyojskUUsE__FM/edit?usp=sharing)
+We did some variable evaluation, tidious but very useful. It was done in a regular [Google Spreadsheet.](https://docs.google.com/spreadsheets/d/16RMnBO7TQLbaJIiphSrcFAlJq7ewtXyojskUUsE__FM/edit?usp=sharing)
 
-From the initial evaluation with determine that some features are more interesting for houses and some for apartment houses. 
+From the initial evaluation with determine that some variables are more interesting for houses and some for apartment houses. 
 
-By following the recommendation from previous author we grouped features into the three categories:
+By following the recommendation from previous author we grouped variables into the three categories:
 
 * `building`
 
@@ -100,9 +100,9 @@ By following the recommendation from previous author we grouped features into th
 
 * `space`
 
-We then also evaluated how much influence each feature would have on the price. Classifying each feature with an expectation of either `Hi`, `Med` or `Low` influence.
+We then also evaluated how much influence each variable would have on the price. Classifying each variable with an expectation of either `Hi`, `Med` or `Low` influence.
 
-The problem is getting more and more tangible and now it's just about validating wether the selected features indeed are positive correlated with an increase in price. 
+The problem is getting more and more tangible and now it's just about validating wether the selected variables indeed are positive correlated with an increase in price. 
 
 ```{r echo = FALSE }
 
@@ -113,7 +113,7 @@ expectation.hi <- c("Neighborhood","Condition1","OverallQual",
 ```
 
 
-To get the overview and find which features that correlate with increased price it's convenient to do a matrix of plot who just take care of everything and give us an image with everything we're interested in. 
+To get the overview and find which variables that correlate with increased price it's convenient to do a matrix of plot who just take care of everything and give us an image with everything we're interested in. 
 
 ```{r echo = FALSE, eval= FALSE }
 df.train.hi <- df.train %>% select(expectation.hi)
@@ -123,11 +123,11 @@ require(GGally)
 ggpairs(df.train.hi, cardinality_threshold = 25)
 ```
 
-###Features expected to have 'Hi' influence
-![Correlation matrix plot for hi influence features](https://dl.dropboxusercontent.com/s/bry1ahaxnyu1s2c/Screenshot%202017-11-25%2023.08.43.png)
-Looks like some of the features we expected to have high influence are positively correlated with the price. The highlighted features are:
+###Variables expected to have 'Hi' influence
+![Correlation matrix plot for hi influence variables](https://dl.dropboxusercontent.com/s/bry1ahaxnyu1s2c/Screenshot%202017-11-25%2023.08.43.png)
+Looks like some of the variables we expected to have high influence are positively correlated with the price. The highlighted variables are:
 
-*  `OverallQual` (*perhaps the most fluffy feature in this dataset - the overall quality of materials and finish*)
+*  `OverallQual` (*perhaps the most fluffy variable in this dataset - the overall quality of materials and finish*)
 
 *  `YearBuilt` (*the year when the house was built*)
 
@@ -138,7 +138,7 @@ Looks like some of the features we expected to have high influence are positivel
 
 #2.What does target varible `SalePrice` look like
 
-The scope for this project is to build a model that from a set of features (which we're currently trying to find) will be the basis for a model which in turn can predict the price - SalePrice.
+The scope for this project is to build a model that from a set of variables (which we're currently trying to find) will be the basis for a model which in turn can predict the price - SalePrice.
 
 
 Let's find out what we know about `SalePrice`. 
@@ -151,7 +151,7 @@ df.train %>%
 
 ###First off - this looks perfect!
 
-There's no zero's, meaning that the feature don't have any outliers that could later on affect our model.
+There's no zero's, meaning that the variable don't have any outliers that could later on affect our model.
 
 Let's have a look at the distribution of `SalePrice`.
 
@@ -182,7 +182,7 @@ df.train %>%
 
 #Let's dig deeper into the relationship
 
-So up until now we've only looked at the relationship between `SalePrice` and numeric features. What about the categorical feature `OverallQual`? We already know that's it's related with `SalePrice` but not how much.
+So up until now we've only looked at the relationship between `SalePrice` and numeric variables. What about the categorical variable `OverallQual`? We already know that's it's related with `SalePrice` but not how much.
 
 ```{r echo = FALSE}
 require(RColorBrewer)
@@ -204,7 +204,7 @@ df.train %>%
 Well, this is nothing new but now we know how the `Overall Quality` is associated with `SalePrice`
 
 
-Let's dig deeper on the second categorical feature 
+Let's dig deeper on the second categorical variable 
 
 ```{r}
 
@@ -231,7 +231,7 @@ df.train %>%
 
 ####Nice colors! But what does it tell us?
 
-As seen above the black trendline helps us to determine that there is a positive association between `SalePrice` and feature `YearBuilt`. 
+As seen above the black trendline helps us to determine that there is a positive association between `SalePrice` and variable `YearBuilt`. 
 
 
 
@@ -239,12 +239,41 @@ As seen above the black trendline helps us to determine that there is a positive
 
 We've now found that:
 
-* `YearBuilt`, `OverallQual`, `YearRemodAdd` and `TotRmsAbvGrd` are all features that's lineraly related with `SalePrice` .
+* `YearBuilt`, `OverallQual`, `YearRemodAdd` and `TotRmsAbvGrd` are all variables that's lineraly related with `SalePrice` .
 
 
-> *"But, hey! That's only 4 features out of 81 available. Don't you miss out on a lot of potential features that could have siginificant affect on the target?"*
+> *"But, hey! That's only 4 variables out of 81 available. Don't you miss out on a lot of potential variables that could have siginificant affect on the target?"*
 
-In Pedro's guide he refer to that the trick for this particular case seems to be `feature selction` rather than `feature engineering`. And the selection of these features was soley based on intuition, in the next section we'll approach this problem a bit more objective as one should as an aspiring data scientist.
+In Pedro's guide he refer to that the trick for this particular case seems to be `variable selction` rather than `variable engineering`. Which seems intutively right when you think about it since we're given 81 where most of them could be variables that describe the sale price of a house (goingin through and evaluating the variables in a spreadsheet).
+
+So far the selection of variables was based soley on intuition. Next we'll approach the problem more objectively. 
 
 
 #3. 
+
+```{r}
+använd detta för att mappa en lm() för alla variabler för att sen kunna sortera dom enkelt dplyr-style
+library(tidyr)
+library(purrr)
+
+# Perform a linear regression on each item in the data column
+by_year_country %>%
+  nest(-country) %>%
+  mutate(model = map(data, ~ lm(percent_yes ~ year, . )))
+  mutate(tidied = tidy(model))
+
+#exempel på hur gather funkar => riktigt användbart!
+  votes_gathered <- votes_joined %>%
+  gather(topic, has_topic, me:ec) %>%
+  filter(has_topic == 1)
+
+  # Filter for only the slope terms
+slope_terms <- country_coefficients %>%
+  filter(term == "year") %>%
+  mutate(p.adjusted = p.adjust(p.value))
+
+# Add p.adjusted column, then filter
+slope_terms %>%
+  filter(p.adjusted < 0.05)
+
+```
