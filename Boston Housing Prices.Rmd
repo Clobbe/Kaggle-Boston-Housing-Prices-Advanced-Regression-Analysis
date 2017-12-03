@@ -180,6 +180,13 @@ df.train %>%
   )
 ```
 
+What does these numbers tell us?
+
+Let's start with `Skewness`. This is simply a number for symmetry which in our case mean that the `mean(SalePrice)` is bigger than the `median(SalePrice)` and as we've already concluded this mean that our distribution is *right skewed* (as seen in plot above).
+
+What about the `Kurtosis`? This is a metric for the *"fatness"* of the tails in our distribution. More specific what this says can be read at [MedCal.org](https://www.medcalc.org/manual/skewnesskurtosis.php)
+
+
 #Let's dig deeper into the relationship
 
 So up until now we've only looked at the relationship between `SalePrice` and numeric variables. What about the categorical variable `OverallQual`? We already know that's it's related with `SalePrice` but not how much.
