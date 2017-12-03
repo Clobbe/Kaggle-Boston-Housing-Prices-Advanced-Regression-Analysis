@@ -369,22 +369,27 @@ df.train.cor.filtered <- df.train.cor %>%
 
 As one can see the labels doesn't contribute that much to our case, but it was a good and valid hypothesis to try. So for now, let's continue without it.
 
-```{r echo = FALSE}
-df.train.cor.filtered <- df.train.cor %>% 
-  filter(Var1 == 'SalePrice' &
-           value > 0.5 &
-           value < 1)
-```
+###Health check - can we trust this?
+Anyhow these 10 variables are correlated we an increase in price. Let's do some health check on each correlation to see that it's also statistically significant as well.
 
-Ok, so these 10 variables are correlated we an increase in price. Let's do some health check on each correlation to see that it's also statistically significant as well.
-
-We'll be doing this by using `map()` from the `purrr`-package to generate a linear model ( `lm()` ) including the nice coefficients that we're gonna use to do our health check. 
-
+We'll be doing this by using `map()` from the `purrr`-package to generate a linear model ( `lm()` ) including the nice coefficients for each of the variables. 
 
 ```{r}
-använd detta för att mappa en lm() för alla variabler för att sen kunna sortera dom enkelt dplyr-style
-library(tidyr)
-library(purrr)
+require(tidyr)
+require(purrr)
+
+
+df.train.model <- data.frame(variable = interestingVariables,stringsAsFactors = FALSE)
+
+
+df.train.model$model <- nest(lm(SalePrice ~ df.train[,which(colnames(df.train) == df.train.model$variable[1])], df.train))
+
+
+df.train.model
+  
+  df.train.model %>% 
+  mutate(model = map(df.train, ~lm(SalePrice ~ df.train.model$variable, .)))
+
 
 # Perform a linear regression on each item in the data column
 by_year_country %>%
@@ -407,3 +412,13 @@ slope_terms %>%
   filter(p.adjusted < 0.05)
 
 ```
+
+1. gen lm för topp 10 var
+2. kolla outliers via boxplot för topp 10 + kolla Pedro's
+3. välj ut variabler och testa vilka som faktiskt skulle kunna predicta SalePrice
+4. Utvärdera resultat => välj modell
+
+
+
+
+
