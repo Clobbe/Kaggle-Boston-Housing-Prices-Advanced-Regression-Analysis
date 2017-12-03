@@ -256,7 +256,70 @@ In Pedro's guide he refer to that the trick for this particular case seems to be
 So far the selection of variables was based soley on intuition. Next we'll approach the problem more objectively. 
 
 
-#3. 
+#3. ~~Intuition~~ , let's go the engineering way
+
+To get a sense of the case that we're dealing with we approached this task in an intuitive fashion which is good, but it wasn't too objective, even thou that was our intention. Doing this I had to set a side my analytical engineering mind for a while and trust Pedro's guidance.
+
+Luckily it's time to let the numbers do their thing and for us to approach the `varible selection` in a more objective manner. 
+
+
+Let's get started!
+
+### Heatmap and faceting plots
+In order to find which variables that correlate with the target `SalePrice` we could visualize this with a correlation matrix (heatmap style) that will help us determine which varibles to choose. Along with this we're also gonna plot each variable against `SalePrice` as a scatter plots. Which we'll then faceting to get a hold of the bigger picture even more.
+
+Let's start with a heatmap!
+
+
+``` {r echo = TRUE}
+require(reshape2) #loading the right package
+
+#calculating correlations and tiding the data frame
+df.train.cor <- df.train %>% 
+  select_if(is.numeric) %>% 
+  cor() %>% 
+  melt()
+```
+
+In order to make it easy to filter and eventually dig deeper into the relations between the variables I'm restructuring the data frame with the `melt()` function in `reshape2`-package.
+
+This turn out data frame into a tidy data frame with on row for each correlation between the variable and it's value, like this:
+
+```{r}
+head(df.train.cor)
+```
+
+
+```{r}
+#plotting heatmap with ggplot2
+
+df.train.cor %>% 
+  ggplot(aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile()
+
+```
+
+
+Oh! Cool that's what I'm talking about, but it's not to easy to decipher. 
+Let's work on that by minimize the number of variables to look at through some nice piping and filtering in [dplyr](http://dplyr.tidyverse.org/). 
+
+
+We're interested in filter out the noise that just messes up our plot so that we can reach what we're looking for - which variables correlate with increase on the target `SalePrice`. 
+
+Since we 
+
+
+```{r}
+df.train.cor %>% 
+  
+  ggplot(aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile()
+
+```
+
+
+
+But first let's prep the data a bit to make it possible to plot what we want.
 
 ```{r}
 använd detta för att mappa en lm() för alla variabler för att sen kunna sortera dom enkelt dplyr-style
