@@ -32,9 +32,11 @@ We'll check if our data meets the assumptions required by most multivariate tech
 
 Meaning, importing the goodies from `tidyverse` for easy data wrangling, `ggplot2` for some nice visualization and `broom` for making sure we don't miss anything while creating our models later on.
 
-```{r echo=FALSE}
+```{r echo = FALSE, eval = FALSE}
 require(ggplot2)
 require(tidyverse)
+require(emojifont)
+load.emojifont(font = "EmojiOne.ttf")
 ```
 
 ```{r }
@@ -271,10 +273,10 @@ In order to find which variables that correlate with the target `SalePrice` we c
 Let's start with a heatmap!
 
 
-``` {r echo = TRUE}
+``` {r}
 require(reshape2) #loading the right package
 
-#calculating correlations and tiding the data frame
+#calculating correlations and tiding the data frame for numeric variables
 df.train.cor <- df.train %>% 
   select_if(is.numeric) %>% 
   cor() %>% 
@@ -295,7 +297,8 @@ head(df.train.cor)
 
 df.train.cor %>% 
   ggplot(aes(x = Var1, y = Var2, fill = value)) +
-  geom_tile()
+  geom_tile() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 ```
 
@@ -304,22 +307,79 @@ Oh! Cool that's what I'm talking about, but it's not to easy to decipher.
 Let's work on that by minimize the number of variables to look at through some nice piping and filtering in [dplyr](http://dplyr.tidyverse.org/). 
 
 
-We're interested in filter out the noise that just messes up our plot so that we can reach what we're looking for - which variables correlate with increase on the target `SalePrice`. 
+We're interested in reducing the noise that make it harder for us distinguish which variables are contributing to an increase on the target `SalePrice`. 
 
-Since we 
+
+At first iteration I'm setting threshold to `0.5` and we'll see wether we need to increase or decrease it. 
 
 
 ```{r}
 df.train.cor %>% 
-  
+  filter(value >= 0.5) %>%
   ggplot(aes(x = Var1, y = Var2, fill = value)) +
-  geom_tile()
+  geom_tile() + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
+##lägg till finlir med att ta bort variabler som inte är av intresse
 ```
 
+That's much better!
+
+With this plot it's now easier for us to decipher [the signal from the noise](https://www.amazon.com/Signal-Noise-Many-Predictions-Fail-but/dp/0143125087/ref=sr_1_1?ie=UTF8&qid=1512298650&sr=8-1&keywords=signal+and+the+noise). 
 
 
-But first let's prep the data a bit to make it possible to plot what we want.
+What we can see among the numerical variables now is that there's 10 that set them self from the crowed:
+
+* `OverallQual`
+* `YearBuilt`
+* `YearRemodAdd`
+* `TotalBsmtSF`
+* `X1stFlrSF`
+* `GrLivArea`
+* `FullBath`
+* `TotRmsAbvGrd`
+* `GarageCars`
+* `GarageArea`
+
+''' städa upp och skriv rent / reflektera över om Pedros reflektioner återspeglas…
+
+According to our crystal ball, these are the variables most correlated with 'SalePrice'. My thoughts on this:
+
+'OverallQual', 'GrLivArea' and 'TotalBsmtSF' are strongly correlated with 'SalePrice'. Check!
+'GarageCars' and 'GarageArea' are also some of the most strongly correlated variables. However, as we discussed in the last sub-point, the number of cars that fit into the garage is a consequence of the garage area. 'GarageCars' and 'GarageArea' are like twin brothers. You'll never be able to distinguish them. Therefore, we just need one of these variables in our analysis (we can keep 'GarageCars' since its correlation with 'SalePrice' is higher).
+'TotalBsmtSF' and '1stFloor' also seem to be twin brothers. We can keep 'TotalBsmtSF' just to say that our first guess was right (re-read 'So... What can we expect?').
+'FullBath'?? Really?
+'TotRmsAbvGrd' and 'GrLivArea', twin brothers again. Is this dataset from Chernobyl?
+Ah... 'YearBuilt'... It seems that 'YearBuilt' is slightly correlated with 'SalePrice'. Honestly, it scares me to think about 'YearBuilt' because I start feeling that we should do a little bit of time-series analysis to get this right. I'll leave this as a homework for you.
+Let's proceed to the scatter plots. '''
+
+
+With these variables let's label them now as either `medium` or `high` like we did in part 1. 
+
+```{r}
+interestingVariables <- c('OverallQual','YearBuilt','YearRemodAdd','TotalBsmtSF','X1stFlrSF',
+                          'GrLivArea','FullBath','TotRmsAbvGrd','GarageCars','GarageArea')
+
+df.train.cor.filtered <- df.train.cor %>% 
+  filter(Var1 == 'SalePrice' &
+           value > 0.5 &
+           value < 1) %>%
+  mutate(label = ifelse(value < 0.75, yes = 'medium', no = 'high'))
+```
+
+As one can see the labels doesn't contribute that much to our case, but it was a good and valid hypothesis to try. So for now, let's continue without it.
+
+```{r echo = FALSE}
+df.train.cor.filtered <- df.train.cor %>% 
+  filter(Var1 == 'SalePrice' &
+           value > 0.5 &
+           value < 1)
+```
+
+Ok, so these 10 variables are correlated we an increase in price. Let's do some health check on each correlation to see that it's also statistically significant as well.
+
+We'll be doing this by using `map()` from the `purrr`-package to generate a linear model ( `lm()` ) including the nice coefficients that we're gonna use to do our health check. 
+
 
 ```{r}
 använd detta för att mappa en lm() för alla variabler för att sen kunna sortera dom enkelt dplyr-style

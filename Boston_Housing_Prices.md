@@ -8,13 +8,13 @@ Clobbe Norman
 
 Need to clean up this bulletlist later + write an introduction to the case and thank Pedro Marcelino for the inspiration and [guidance on his approach to this project](https://www.kaggle.com/pmarcelino/comprehensive-data-exploration-with-python)
 
-1.  **Understand the problem** We'll look at each feature and do a philosophical analysis about their meaning and importance for this problem.\*
+1.  **Understand the problem** We'll look at each variable and do a philosophical analysis about their meaning and importance for this problem.\*
 
-2.  **Univariable study** We'll just focus on the dependent feature ('SalePrice') and try to know a little bit more about it.
+2.  **Univariable study** We'll just focus on the dependent variable ('SalePrice') and try to know a little bit more about it.
 
-3.  **Multivariate study** We'll try to understand how the dependent feature and independent features relate.
+3.  **Multivariate study** We'll try to understand how the dependent variable and independent variables relate.
 
-4.  **Basic cleaning** We'll clean the dataset and handle the missing data, outliers and categorical features.
+4.  **Basic cleaning** We'll clean the dataset and handle the missing data, outliers and categorical variables.
 
 5.  **Test assumptions** We'll check if our data meets the assumptions required by most multivariate techniques.
 
@@ -24,15 +24,28 @@ Pick up the right toolset
 Meaning, importing the goodies from `tidyverse` for easy data wrangling, `ggplot2` for some nice visualization and `broom` for making sure we don't miss anything while creating our models later on.
 
 ``` r
-require(ggplot2)
-require(tidyverse)
-
 df.test.raw <- read_csv('test.csv', col_names = T)
-df.train.raw <- read_csv('train.csv', col_names = T)
+```
 
+    ## Error in eval(expr, envir, enclos): could not find function "read_csv"
+
+``` r
+df.train.raw <- read_csv('train.csv', col_names = T)
+```
+
+    ## Error in eval(expr, envir, enclos): could not find function "read_csv"
+
+``` r
 df.test <- df.test.raw
+```
+
+    ## Error in eval(expr, envir, enclos): object 'df.test.raw' not found
+
+``` r
 df.train <- df.train.raw
 ```
+
+    ## Error in eval(expr, envir, enclos): object 'df.train.raw' not found
 
 Now let's have a look at the the data that we loaded into R.
 
@@ -41,93 +54,11 @@ df.train %>%
   glimpse()
 ```
 
-    ## Observations: 1,460
-    ## Variables: 81
-    ## $ Id            <int> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 1...
-    ## $ MSSubClass    <int> 60, 20, 60, 70, 60, 50, 20, 60, 50, 190, 20, 60,...
-    ## $ MSZoning      <chr> "RL", "RL", "RL", "RL", "RL", "RL", "RL", "RL", ...
-    ## $ LotFrontage   <int> 65, 80, 68, 60, 84, 85, 75, NA, 51, 50, 70, 85, ...
-    ## $ LotArea       <int> 8450, 9600, 11250, 9550, 14260, 14115, 10084, 10...
-    ## $ Street        <chr> "Pave", "Pave", "Pave", "Pave", "Pave", "Pave", ...
-    ## $ Alley         <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...
-    ## $ LotShape      <chr> "Reg", "Reg", "IR1", "IR1", "IR1", "IR1", "Reg",...
-    ## $ LandContour   <chr> "Lvl", "Lvl", "Lvl", "Lvl", "Lvl", "Lvl", "Lvl",...
-    ## $ Utilities     <chr> "AllPub", "AllPub", "AllPub", "AllPub", "AllPub"...
-    ## $ LotConfig     <chr> "Inside", "FR2", "Inside", "Corner", "FR2", "Ins...
-    ## $ LandSlope     <chr> "Gtl", "Gtl", "Gtl", "Gtl", "Gtl", "Gtl", "Gtl",...
-    ## $ Neighborhood  <chr> "CollgCr", "Veenker", "CollgCr", "Crawfor", "NoR...
-    ## $ Condition1    <chr> "Norm", "Feedr", "Norm", "Norm", "Norm", "Norm",...
-    ## $ Condition2    <chr> "Norm", "Norm", "Norm", "Norm", "Norm", "Norm", ...
-    ## $ BldgType      <chr> "1Fam", "1Fam", "1Fam", "1Fam", "1Fam", "1Fam", ...
-    ## $ HouseStyle    <chr> "2Story", "1Story", "2Story", "2Story", "2Story"...
-    ## $ OverallQual   <int> 7, 6, 7, 7, 8, 5, 8, 7, 7, 5, 5, 9, 5, 7, 6, 7, ...
-    ## $ OverallCond   <int> 5, 8, 5, 5, 5, 5, 5, 6, 5, 6, 5, 5, 6, 5, 5, 8, ...
-    ## $ YearBuilt     <int> 2003, 1976, 2001, 1915, 2000, 1993, 2004, 1973, ...
-    ## $ YearRemodAdd  <int> 2003, 1976, 2002, 1970, 2000, 1995, 2005, 1973, ...
-    ## $ RoofStyle     <chr> "Gable", "Gable", "Gable", "Gable", "Gable", "Ga...
-    ## $ RoofMatl      <chr> "CompShg", "CompShg", "CompShg", "CompShg", "Com...
-    ## $ Exterior1st   <chr> "VinylSd", "MetalSd", "VinylSd", "Wd Sdng", "Vin...
-    ## $ Exterior2nd   <chr> "VinylSd", "MetalSd", "VinylSd", "Wd Shng", "Vin...
-    ## $ MasVnrType    <chr> "BrkFace", "None", "BrkFace", "None", "BrkFace",...
-    ## $ MasVnrArea    <int> 196, 0, 162, 0, 350, 0, 186, 240, 0, 0, 0, 286, ...
-    ## $ ExterQual     <chr> "Gd", "TA", "Gd", "TA", "Gd", "TA", "Gd", "TA", ...
-    ## $ ExterCond     <chr> "TA", "TA", "TA", "TA", "TA", "TA", "TA", "TA", ...
-    ## $ Foundation    <chr> "PConc", "CBlock", "PConc", "BrkTil", "PConc", "...
-    ## $ BsmtQual      <chr> "Gd", "Gd", "Gd", "TA", "Gd", "Gd", "Ex", "Gd", ...
-    ## $ BsmtCond      <chr> "TA", "TA", "TA", "Gd", "TA", "TA", "TA", "TA", ...
-    ## $ BsmtExposure  <chr> "No", "Gd", "Mn", "No", "Av", "No", "Av", "Mn", ...
-    ## $ BsmtFinType1  <chr> "GLQ", "ALQ", "GLQ", "ALQ", "GLQ", "GLQ", "GLQ",...
-    ## $ BsmtFinSF1    <int> 706, 978, 486, 216, 655, 732, 1369, 859, 0, 851,...
-    ## $ BsmtFinType2  <chr> "Unf", "Unf", "Unf", "Unf", "Unf", "Unf", "Unf",...
-    ## $ BsmtFinSF2    <int> 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0,...
-    ## $ BsmtUnfSF     <int> 150, 284, 434, 540, 490, 64, 317, 216, 952, 140,...
-    ## $ TotalBsmtSF   <int> 856, 1262, 920, 756, 1145, 796, 1686, 1107, 952,...
-    ## $ Heating       <chr> "GasA", "GasA", "GasA", "GasA", "GasA", "GasA", ...
-    ## $ HeatingQC     <chr> "Ex", "Ex", "Ex", "Gd", "Ex", "Ex", "Ex", "Ex", ...
-    ## $ CentralAir    <chr> "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y"...
-    ## $ Electrical    <chr> "SBrkr", "SBrkr", "SBrkr", "SBrkr", "SBrkr", "SB...
-    ## $ `1stFlrSF`    <int> 856, 1262, 920, 961, 1145, 796, 1694, 1107, 1022...
-    ## $ `2ndFlrSF`    <int> 854, 0, 866, 756, 1053, 566, 0, 983, 752, 0, 0, ...
-    ## $ LowQualFinSF  <int> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...
-    ## $ GrLivArea     <int> 1710, 1262, 1786, 1717, 2198, 1362, 1694, 2090, ...
-    ## $ BsmtFullBath  <int> 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, ...
-    ## $ BsmtHalfBath  <int> 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...
-    ## $ FullBath      <int> 2, 2, 2, 1, 2, 1, 2, 2, 2, 1, 1, 3, 1, 2, 1, 1, ...
-    ## $ HalfBath      <int> 1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, ...
-    ## $ BedroomAbvGr  <int> 3, 3, 3, 3, 4, 1, 3, 3, 2, 2, 3, 4, 2, 3, 2, 2, ...
-    ## $ KitchenAbvGr  <int> 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, ...
-    ## $ KitchenQual   <chr> "Gd", "TA", "Gd", "Gd", "Gd", "TA", "Gd", "TA", ...
-    ## $ TotRmsAbvGrd  <int> 8, 6, 6, 7, 9, 5, 7, 7, 8, 5, 5, 11, 4, 7, 5, 5,...
-    ## $ Functional    <chr> "Typ", "Typ", "Typ", "Typ", "Typ", "Typ", "Typ",...
-    ## $ Fireplaces    <int> 0, 1, 1, 1, 1, 0, 1, 2, 2, 2, 0, 2, 0, 1, 1, 0, ...
-    ## $ FireplaceQu   <chr> NA, "TA", "TA", "Gd", "TA", NA, "Gd", "TA", "TA"...
-    ## $ GarageType    <chr> "Attchd", "Attchd", "Attchd", "Detchd", "Attchd"...
-    ## $ GarageYrBlt   <int> 2003, 1976, 2001, 1998, 2000, 1993, 2004, 1973, ...
-    ## $ GarageFinish  <chr> "RFn", "RFn", "RFn", "Unf", "RFn", "Unf", "RFn",...
-    ## $ GarageCars    <int> 2, 2, 2, 3, 3, 2, 2, 2, 2, 1, 1, 3, 1, 3, 1, 2, ...
-    ## $ GarageArea    <int> 548, 460, 608, 642, 836, 480, 636, 484, 468, 205...
-    ## $ GarageQual    <chr> "TA", "TA", "TA", "TA", "TA", "TA", "TA", "TA", ...
-    ## $ GarageCond    <chr> "TA", "TA", "TA", "TA", "TA", "TA", "TA", "TA", ...
-    ## $ PavedDrive    <chr> "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y"...
-    ## $ WoodDeckSF    <int> 0, 298, 0, 0, 192, 40, 255, 235, 90, 0, 0, 147, ...
-    ## $ OpenPorchSF   <int> 61, 0, 42, 35, 84, 30, 57, 204, 0, 4, 0, 21, 0, ...
-    ## $ EnclosedPorch <int> 0, 0, 0, 272, 0, 0, 0, 228, 205, 0, 0, 0, 0, 0, ...
-    ## $ `3SsnPorch`   <int> 0, 0, 0, 0, 0, 320, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0...
-    ## $ ScreenPorch   <int> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 176, 0, 0, 0...
-    ## $ PoolArea      <int> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...
-    ## $ PoolQC        <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...
-    ## $ Fence         <chr> NA, NA, NA, NA, NA, "MnPrv", NA, NA, NA, NA, NA,...
-    ## $ MiscFeature   <chr> NA, NA, NA, NA, NA, "Shed", NA, "Shed", NA, NA, ...
-    ## $ MiscVal       <int> 0, 0, 0, 0, 0, 700, 0, 350, 0, 0, 0, 0, 0, 0, 0,...
-    ## $ MoSold        <int> 2, 5, 9, 2, 12, 10, 8, 11, 4, 1, 2, 7, 9, 8, 5, ...
-    ## $ YrSold        <int> 2008, 2007, 2008, 2006, 2008, 2009, 2007, 2009, ...
-    ## $ SaleType      <chr> "WD", "WD", "WD", "WD", "WD", "WD", "WD", "WD", ...
-    ## $ SaleCondition <chr> "Normal", "Normal", "Normal", "Abnorml", "Normal...
-    ## $ SalePrice     <int> 208500, 181500, 223500, 140000, 250000, 143000, ...
+    ## Error in eval(expr, envir, enclos): could not find function "%>%"
 
-Wow! That's impressive - 1,460 observations and 81 features.
+Wow! That's impressive - 1,460 observations and 81 variables.
 
-From this quick overview of the dataset it seems like R interpret all the text varibles as `<chr>`, character features. Something which will mess up later when we want to build our model and doing some visualization.
+From this quick overview of the dataset it seems like R interpret all the text varibles as `<chr>`, character variables. Something which will mess up later when we want to build our model and doing some visualization.
 
 Let's fix that by turning these characters into proper factors with levels instead.
 
@@ -135,36 +66,29 @@ Let's fix that by turning these characters into proper factors with levels inste
 df.test <- df.test %>% 
   unclass() %>% 
   as.data.frame()
+```
 
+    ## Error in eval(expr, envir, enclos): could not find function "%>%"
+
+``` r
 df.train <- df.train %>% 
   unclass() %>% 
   as.data.frame()
 ```
 
-Let's have a look now again at the features.
+    ## Error in eval(expr, envir, enclos): could not find function "%>%"
+
+Let's have a look now again at the variables.
 
 ``` r
 df.train %>%
   glimpse()
 ```
 
-    ## Observations: 1,460
-    ## Variables: 81
-    ## $ Id            <int> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 1...
-    ## $ MSSubClass    <int> 60, 20, 60, 70, 60, 50, 20, 60, 50, 190, 20, 60,...
-    ## $ MSZoning      <fctr> RL, RL, RL, RL, RL, RL, RL, RL, RM, RL, RL, RL,...
-    ## $ LotFrontage   <int> 65, 80, 68, 60, 84, 85, 75, NA, 51, 50, 70, 85, ...
-    ## $ LotArea       <int> 8450, 9600, 11250, 9550, 14260, 14115, 10084, 10...
-    ## $ Street        <fctr> Pave, Pave, Pave, Pave, Pave, Pave, Pave, Pave,...
-    ...
-    ## $ SaleType      <fctr> WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, New...
-    ## $ SaleCondition <fctr> Normal, Normal, Normal, Abnorml, Normal, Normal...
-    ## $ SalePrice     <int> 208500, 181500, 223500, 140000, 250000, 143000, ...
+    ## Error in eval(expr, envir, enclos): could not find function "%>%"
 
-*(yes, I intentionally cut the output so you didn't have to scroll as much again)*
-
-Let's look at the features
---------------------------
+Let's look at the variables
+---------------------------
 
 ``` r
 df.train %>% 
@@ -172,33 +96,13 @@ df.train %>%
   sort()
 ```
 
-    ##  [1] "Alley"         "BedroomAbvGr"  "BldgType"      "BsmtCond"     
-    ##  [5] "BsmtExposure"  "BsmtFinSF1"    "BsmtFinSF2"    "BsmtFinType1" 
-    ##  [9] "BsmtFinType2"  "BsmtFullBath"  "BsmtHalfBath"  "BsmtQual"     
-    ## [13] "BsmtUnfSF"     "CentralAir"    "Condition1"    "Condition2"   
-    ## [17] "Electrical"    "EnclosedPorch" "ExterCond"     "Exterior1st"  
-    ## [21] "Exterior2nd"   "ExterQual"     "Fence"         "FireplaceQu"  
-    ## [25] "Fireplaces"    "Foundation"    "FullBath"      "Functional"   
-    ## [29] "GarageArea"    "GarageCars"    "GarageCond"    "GarageFinish" 
-    ## [33] "GarageQual"    "GarageType"    "GarageYrBlt"   "GrLivArea"    
-    ## [37] "HalfBath"      "Heating"       "HeatingQC"     "HouseStyle"   
-    ## [41] "Id"            "KitchenAbvGr"  "KitchenQual"   "LandContour"  
-    ## [45] "LandSlope"     "LotArea"       "LotConfig"     "LotFrontage"  
-    ## [49] "LotShape"      "LowQualFinSF"  "MasVnrArea"    "MasVnrType"   
-    ## [53] "MiscFeature"   "MiscVal"       "MoSold"        "MSSubClass"   
-    ## [57] "MSZoning"      "Neighborhood"  "OpenPorchSF"   "OverallCond"  
-    ## [61] "OverallQual"   "PavedDrive"    "PoolArea"      "PoolQC"       
-    ## [65] "RoofMatl"      "RoofStyle"     "SaleCondition" "SalePrice"    
-    ## [69] "SaleType"      "ScreenPorch"   "Street"        "TotalBsmtSF"  
-    ## [73] "TotRmsAbvGrd"  "Utilities"     "WoodDeckSF"    "X1stFlrSF"    
-    ## [77] "X2ndFlrSF"     "X3SsnPorch"    "YearBuilt"     "YearRemodAdd" 
-    ## [81] "YrSold"
+    ## Error in eval(expr, envir, enclos): could not find function "%>%"
 
-We did some feature evaluation, tidious but very useful. It was done in a regular [Google Spreadsheet.](https://docs.google.com/spreadsheets/d/16RMnBO7TQLbaJIiphSrcFAlJq7ewtXyojskUUsE__FM/edit?usp=sharing)
+We did some variable evaluation, tidious but very useful. It was done in a regular [Google Spreadsheet.](https://docs.google.com/spreadsheets/d/16RMnBO7TQLbaJIiphSrcFAlJq7ewtXyojskUUsE__FM/edit?usp=sharing)
 
-From the initial evaluation with determine that some features are more interesting for houses and some for apartment houses.
+From the initial evaluation with determine that some variables are more interesting for houses and some for apartment houses.
 
-By following the recommendation from previous author we grouped features into the three categories:
+By following the recommendation from previous author we grouped variables into the three categories:
 
 -   `building`
 
@@ -206,17 +110,17 @@ By following the recommendation from previous author we grouped features into th
 
 -   `space`
 
-We then also evaluated how much influence each feature would have on the price. Classifying each feature with an expectation of either `Hi`, `Med` or `Low` influence.
+We then also evaluated how much influence each variable would have on the price. Classifying each variable with an expectation of either `Hi`, `Med` or `Low` influence.
 
-The problem is getting more and more tangible and now it's just about validating wether the selected features indeed are positive correlated with an increase in price.
+The problem is getting more and more tangible and now it's just about validating wether the selected variables indeed are positive correlated with an increase in price.
 
-To get the overview and find which features that correlate with increased price it's convenient to do a matrix of plot who just take care of everything and give us an image with everything we're interested in.
+To get the overview and find which variables that correlate with increased price it's convenient to do a matrix of plot who just take care of everything and give us an image with everything we're interested in.
 
-### Features expected to have 'Hi' influence
+### Variables expected to have 'Hi' influence
 
-![Correlation matrix plot for hi influence features](https://dl.dropboxusercontent.com/s/bry1ahaxnyu1s2c/Screenshot%202017-11-25%2023.08.43.png) Looks like some of the features we expected to have high influence are positively correlated with the price. The highlighted features are:
+![Correlation matrix plot for hi influence variables](https://dl.dropboxusercontent.com/s/bry1ahaxnyu1s2c/Screenshot%202017-11-25%2023.08.43.png) Looks like some of the variables we expected to have high influence are positively correlated with the price. The highlighted variables are:
 
--   `OverallQual` (*perhaps the most fluffy feature in this dataset - the overall quality of materials and finish*)
+-   `OverallQual` (*perhaps the most fluffy variable in this dataset - the overall quality of materials and finish*)
 
 -   `YearBuilt` (*the year when the house was built*)
 
@@ -227,7 +131,7 @@ To get the overview and find which features that correlate with increased price 
 2.What does target varible `SalePrice` look like
 ================================================
 
-The scope for this project is to build a model that from a set of features (which we're currently trying to find) will be the basis for a model which in turn can predict the price - SalePrice.
+The scope for this project is to build a model that from a set of variables (which we're currently trying to find) will be the basis for a model which in turn can predict the price - SalePrice.
 
 Let's find out what we know about `SalePrice`.
 
@@ -237,17 +141,11 @@ df.train %>%
   summary()
 ```
 
-    ##    SalePrice     
-    ##  Min.   : 34900  
-    ##  1st Qu.:129975  
-    ##  Median :163000  
-    ##  Mean   :180921  
-    ##  3rd Qu.:214000  
-    ##  Max.   :755000
+    ## Error in eval(expr, envir, enclos): could not find function "%>%"
 
 ### First off - this looks perfect!
 
-There's no zero's, meaning that the feature don't have any outliers that could later on affect our model.
+There's no zero's, meaning that the variable don't have any outliers that could later on affect our model.
 
 Let's have a look at the distribution of `SalePrice`.
 
@@ -261,9 +159,7 @@ df.train %>%
   geom_density(alpha = 0, size = 1)
 ```
 
-    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
-
-![](Boston_Housing_Prices_files/figure-markdown_github/unnamed-chunk-10-1.png)
+    ## Error in eval(expr, envir, enclos): could not find function "%>%"
 
 Seems like we're dealing with a right skewed distribution, meaning it's deviating from a good ole normal distribution.
 
@@ -284,13 +180,18 @@ df.train %>%
   )
 ```
 
-    ##   Skewness Kurtosis
-    ## 1 1.880941 9.509812
+    ## Error in eval(expr, envir, enclos): could not find function "%>%"
+
+What does these numbers tell us?
+
+Let's start with `Skewness`. This is simply a number for symmetry which in our case mean that the `mean(SalePrice)` is bigger than the `median(SalePrice)` and as we've already concluded this mean that our distribution is *right skewed* (as seen in plot above).
+
+What about the `Kurtosis`? This is a metric for the *"fatness"* of the tails in our distribution. More specific what this says can be read at [MedCal.org](https://www.medcalc.org/manual/skewnesskurtosis.php)
 
 Let's dig deeper into the relationship
 ======================================
 
-So up until now we've only looked at the relationship between `SalePrice` and numeric features. What about the categorical feature `OverallQual`? We already know that's it's related with `SalePrice` but not how much.
+So up until now we've only looked at the relationship between `SalePrice` and numeric variables. What about the categorical variable `OverallQual`? We already know that's it's related with `SalePrice` but not how much.
 
     ## Loading required package: RColorBrewer
 
@@ -306,11 +207,11 @@ df.train %>%
   xlab('OverallQual')
 ```
 
-![](Boston_Housing_Prices_files/figure-markdown_github/unnamed-chunk-13-1.png)
+    ## Error in eval(expr, envir, enclos): could not find function "%>%"
 
 Well, this is nothing new but now we know how the `Overall Quality` is associated with `SalePrice`
 
-Let's dig deeper on the second categorical feature
+Let's dig deeper on the second categorical variable
 
 ``` r
 df.train %>% 
@@ -333,21 +234,123 @@ df.train %>%
   xlab('YearBuilt')
 ```
 
-![](Boston_Housing_Prices_files/figure-markdown_github/unnamed-chunk-14-1.png)
+    ## Error in eval(expr, envir, enclos): could not find function "%>%"
 
 #### Nice colors! But what does it tell us?
 
-As seen above the black trendline helps us to determine that there is a positive association between `SalePrice` and feature `YearBuilt`.
+As seen above the black trendline helps us to determine that there is a positive association between `SalePrice` and variable `YearBuilt`.
 
 ### So to sum things up…
 
 We've now found that:
 
--   `YearBuilt`, `OverallQual`, `YearRemodAdd` and `TotRmsAbvGrd` are all features that's lineraly related with `SalePrice` .
+-   `YearBuilt`, `OverallQual`, `YearRemodAdd` and `TotRmsAbvGrd` are all variables that's lineraly related with `SalePrice` .
 
-> *"But, hey! That's only 4 features out of 81 available. Don't you miss out on a lot of potential features that could have siginificant affect on the target?"*
+> *"But, hey! That's only 4 variables out of 81 available. Don't you miss out on a lot of potential variables that could have siginificant affect on the target?"*
 
-In Pedro's guide he refer to that the trick for this particular case seems to be `feature selction` rather than `feature engineering`. And the selection of these features was soley based on intuition, in the next section we'll approach this problem a bit more objective as one should as an aspiring data scientist.
+In Pedro's guide he refer to that the trick for this particular case seems to be `variable selction` rather than `variable engineering`. Which seems intutively right when you think about it since we're given 81 where most of them could be variables that describe the sale price of a house (goingin through and evaluating the variables in a spreadsheet).
 
-3.
-==
+So far the selection of variables was based soley on intuition. Next we'll approach the problem more objectively.
+
+3. ~~Intuition~~ , let's go the engineering way
+===============================================
+
+To get a sense of the case that we're dealing with we approached this task in an intuitive fashion which is good, but it wasn't too objective, even thou that was our intention. Doing this I had to set a side my analytical engineering mind for a while and trust Pedro's guidance.
+
+Luckily it's time to let the numbers do their thing and for us to approach the `varible selection` in a more objective manner.
+
+Let's get started!
+
+### Heatmap and faceting plots
+
+In order to find which variables that correlate with the target `SalePrice` we could visualize this with a correlation matrix (heatmap style) that will help us determine which varibles to choose. Along with this we're also gonna plot each variable against `SalePrice` as a scatter plots. Which we'll then faceting to get a hold of the bigger picture even more.
+
+Let's start with a heatmap!
+
+``` r
+require(reshape2) #loading the right package
+```
+
+    ## Loading required package: reshape2
+
+``` r
+#calculating correlations and tiding the data frame for numeric variables
+df.train.cor <- df.train %>% 
+  select_if(is.numeric) %>% 
+  cor() %>% 
+  melt()
+```
+
+    ## Error in eval(expr, envir, enclos): could not find function "%>%"
+
+In order to make it easy to filter and eventually dig deeper into the relations between the variables I'm restructuring the data frame with the `melt()` function in `reshape2`-package.
+
+This turn out data frame into a tidy data frame with on row for each correlation between the variable and it's value, like this:
+
+``` r
+head(df.train.cor)
+```
+
+    ## Error in head(df.train.cor): object 'df.train.cor' not found
+
+``` r
+#plotting heatmap with ggplot2
+
+df.train.cor %>% 
+  ggplot(aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile()
+```
+
+    ## Error in eval(expr, envir, enclos): could not find function "%>%"
+
+Oh! Cool that's what I'm talking about, but it's not to easy to decipher. Let's work on that by minimize the number of variables to look at through some nice piping and filtering in [dplyr](http://dplyr.tidyverse.org/).
+
+We're interested in reducing the noise that make it harder for us distinguish which variables are contributing to an increase on the target `SalePrice`.
+
+At first iteration I'm setting threshold to `0.5` and we'll see wether we need to increase or decrease it.
+
+``` r
+df.train.cor %>% 
+  filter(value >= 0.5) %>%
+  ggplot(aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+    ## Error in eval(expr, envir, enclos): could not find function "%>%"
+
+That's much better!
+
+With this plot it's now easier for us to decipher [the signal from the noise](https://www.amazon.com/Signal-Noise-Many-Predictions-Fail-but/dp/0143125087/ref=sr_1_1?ie=UTF8&qid=1512298650&sr=8-1&keywords=signal+and+the+noise).
+
+What we can see among the numerical variables now is that there's 10 that set them self from the crowed: \* \`\`
+
+``` r
+använd detta för att mappa en lm() för alla variabler för att sen kunna sortera dom enkelt dplyr-style
+library(tidyr)
+library(purrr)
+
+# Perform a linear regression on each item in the data column
+by_year_country %>%
+  nest(-country) %>%
+  mutate(model = map(data, ~ lm(percent_yes ~ year, . )))
+  mutate(tidied = tidy(model))
+
+#exempel på hur gather funkar => riktigt användbart!
+  votes_gathered <- votes_joined %>%
+  gather(topic, has_topic, me:ec) %>%
+  filter(has_topic == 1)
+
+  # Filter for only the slope terms
+slope_terms <- country_coefficients %>%
+  filter(term == "year") %>%
+  mutate(p.adjusted = p.adjust(p.value))
+
+# Add p.adjusted column, then filter
+slope_terms %>%
+  filter(p.adjusted < 0.05)
+```
+
+    ## Error: <text>:1:9: unexpected symbol
+    ## 1: använd detta
+    ##             ^
