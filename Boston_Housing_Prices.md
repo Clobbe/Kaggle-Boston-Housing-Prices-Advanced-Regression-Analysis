@@ -298,7 +298,8 @@ head(df.train.cor)
 
 df.train.cor %>% 
   ggplot(aes(x = Var1, y = Var2, fill = value)) +
-  geom_tile()
+  geom_tile() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
     ## Error in eval(expr, envir, enclos): could not find function "%>%"
@@ -319,38 +320,149 @@ df.train.cor %>%
 
     ## Error in eval(expr, envir, enclos): could not find function "%>%"
 
+``` r
+##lägg till finlir med att ta bort variabler som inte är av intresse
+```
+
 That's much better!
 
 With this plot it's now easier for us to decipher [the signal from the noise](https://www.amazon.com/Signal-Noise-Many-Predictions-Fail-but/dp/0143125087/ref=sr_1_1?ie=UTF8&qid=1512298650&sr=8-1&keywords=signal+and+the+noise).
 
-What we can see among the numerical variables now is that there's 10 that set them self from the crowed: \* \`\`
+What we can see among the numerical variables now is that there's 10 that set them self from the crowed:
+
+-   `OverallQual`
+-   `YearBuilt`
+-   `YearRemodAdd`
+-   `TotalBsmtSF`
+-   `X1stFlrSF`
+-   `GrLivArea`
+-   `FullBath`
+-   `TotRmsAbvGrd`
+-   `GarageCars`
+-   `GarageArea`
+
+''' städa upp och skriv rent / reflektera över om Pedros reflektioner återspeglas…
+
+According to our crystal ball, these are the variables most correlated with 'SalePrice'. My thoughts on this:
+
+'OverallQual', 'GrLivArea' and 'TotalBsmtSF' are strongly correlated with 'SalePrice'. Check! 'GarageCars' and 'GarageArea' are also some of the most strongly correlated variables. However, as we discussed in the last sub-point, the number of cars that fit into the garage is a consequence of the garage area. 'GarageCars' and 'GarageArea' are like twin brothers. You'll never be able to distinguish them. Therefore, we just need one of these variables in our analysis (we can keep 'GarageCars' since its correlation with 'SalePrice' is higher). 'TotalBsmtSF' and '1stFloor' also seem to be twin brothers. We can keep 'TotalBsmtSF' just to say that our first guess was right (re-read 'So... What can we expect?'). 'FullBath'?? Really? 'TotRmsAbvGrd' and 'GrLivArea', twin brothers again. Is this dataset from Chernobyl? Ah... 'YearBuilt'... It seems that 'YearBuilt' is slightly correlated with 'SalePrice'. Honestly, it scares me to think about 'YearBuilt' because I start feeling that we should do a little bit of time-series analysis to get this right. I'll leave this as a homework for you. Let's proceed to the scatter plots. '''
+
+With these variables let's label them now as either `medium` or `high` like we did in part 1.
 
 ``` r
-använd detta för att mappa en lm() för alla variabler för att sen kunna sortera dom enkelt dplyr-style
-library(tidyr)
-library(purrr)
+interestingVariables <- c('OverallQual','YearBuilt','YearRemodAdd','TotalBsmtSF','X1stFlrSF',
+                          'GrLivArea','FullBath','TotRmsAbvGrd','GarageCars','GarageArea')
 
+df.train.cor.filtered <- df.train.cor %>% 
+  filter(Var1 == 'SalePrice' &
+           value > 0.5 &
+           value < 1) %>%
+  mutate(label = ifelse(value < 0.75, yes = 'medium', no = 'high'))
+```
+
+    ## Error in eval(expr, envir, enclos): could not find function "%>%"
+
+As one can see the labels doesn't contribute that much to our case, but it was a good and valid hypothesis to try. So for now, let's continue without it.
+
+### Health check - can we trust this?
+
+Anyhow these 10 variables are correlated we an increase in price. Let's do some health check on each correlation to see that it's also statistically significant as well.
+
+We'll be doing this by using `map()` from the `purrr`-package to generate a linear model ( `lm()` ) including the nice coefficients for each of the variables.
+
+``` r
+require(tidyr)
+```
+
+    ## Loading required package: tidyr
+
+    ## 
+    ## Attaching package: 'tidyr'
+
+    ## The following object is masked from 'package:reshape2':
+    ## 
+    ##     smiths
+
+``` r
+require(purrr)
+```
+
+    ## Loading required package: purrr
+
+``` r
+df.train.model <- data.frame(variable = interestingVariables,stringsAsFactors = FALSE)
+
+
+df.train.model$model <- nest(lm(SalePrice ~ df.train[,which(colnames(df.train) == df.train.model$variable[1])], df.train))
+```
+
+    ## Error in is.data.frame(data): object 'df.train' not found
+
+``` r
+df.train.model
+```
+
+    ##        variable
+    ## 1   OverallQual
+    ## 2     YearBuilt
+    ## 3  YearRemodAdd
+    ## 4   TotalBsmtSF
+    ## 5     X1stFlrSF
+    ## 6     GrLivArea
+    ## 7      FullBath
+    ## 8  TotRmsAbvGrd
+    ## 9    GarageCars
+    ## 10   GarageArea
+
+``` r
+  df.train.model %>% 
+  mutate(model = map(df.train, ~lm(SalePrice ~ df.train.model$variable, .)))
+```
+
+    ## Error in function_list[[k]](value): could not find function "mutate"
+
+``` r
 # Perform a linear regression on each item in the data column
 by_year_country %>%
   nest(-country) %>%
   mutate(model = map(data, ~ lm(percent_yes ~ year, . )))
-  mutate(tidied = tidy(model))
+```
 
+    ## Error in eval(expr, envir, enclos): object 'by_year_country' not found
+
+``` r
+  mutate(tidied = tidy(model))
+```
+
+    ## Error in eval(expr, envir, enclos): could not find function "mutate"
+
+``` r
 #exempel på hur gather funkar => riktigt användbart!
   votes_gathered <- votes_joined %>%
   gather(topic, has_topic, me:ec) %>%
   filter(has_topic == 1)
+```
 
+    ## Error in eval(expr, envir, enclos): object 'votes_joined' not found
+
+``` r
   # Filter for only the slope terms
 slope_terms <- country_coefficients %>%
   filter(term == "year") %>%
   mutate(p.adjusted = p.adjust(p.value))
+```
 
+    ## Error in eval(expr, envir, enclos): object 'country_coefficients' not found
+
+``` r
 # Add p.adjusted column, then filter
 slope_terms %>%
   filter(p.adjusted < 0.05)
 ```
 
-    ## Error: <text>:1:9: unexpected symbol
-    ## 1: använd detta
-    ##             ^
+    ## Error in eval(expr, envir, enclos): object 'slope_terms' not found
+
+1.  gen lm för topp 10 var
+2.  kolla outliers via boxplot för topp 10 + kolla Pedro's
+3.  välj ut variabler och testa vilka som faktiskt skulle kunna predicta SalePrice
+4.  Utvärdera resultat =&gt; välj modell

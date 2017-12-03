@@ -26,16 +26,16 @@ We'll try to understand how the dependent variable and independent variables rel
 We'll clean the dataset and handle the missing data, outliers and categorical variables.
 
 5. **Test assumptions**
-We'll check if our data meets the assumptions required by most multivariate techniques.
+We'll check if our data meets the assumptions libraryd by most multivariate techniques.
 
 ## Pick up the right toolset
 
 Meaning, importing the goodies from `tidyverse` for easy data wrangling, `ggplot2` for some nice visualization and `broom` for making sure we don't miss anything while creating our models later on.
 
 ```{r echo = FALSE, eval = FALSE}
-require(ggplot2)
-require(tidyverse)
-require(emojifont)
+library(ggplot2)
+library(tidyverse)
+library(emojifont)
 load.emojifont(font = "EmojiOne.ttf")
 ```
 
@@ -121,7 +121,7 @@ To get the overview and find which variables that correlate with increased price
 df.train.hi <- df.train %>% select(expectation.hi)
 df.train.med <- df.train %>% select(expectation.med)
 
-require(GGally)
+library(GGally)
 ggpairs(df.train.hi, cardinality_threshold = 25)
 ```
 
@@ -172,7 +172,7 @@ Seems like we're dealing with a right skewed distribution, meaning it's deviatin
 Let's find out just how skewed the distribution is.
 
 ```{r echo = TRUE}
-require(moments)
+library(moments)
 
 df.train %>% 
   select(SalePrice) %>% 
@@ -194,7 +194,7 @@ What about the `Kurtosis`? This is a metric for the *"fatness"* of the tails in 
 So up until now we've only looked at the relationship between `SalePrice` and numeric variables. What about the categorical variable `OverallQual`? We already know that's it's related with `SalePrice` but not how much.
 
 ```{r echo = FALSE}
-require(RColorBrewer)
+library(RColorBrewer)
 colors <- brewer.pal(11, 'Spectral')
 ```
 
@@ -274,7 +274,7 @@ Let's start with a heatmap!
 
 
 ``` {r}
-require(reshape2) #loading the right package
+library(reshape2) #loading the right package
 
 #calculating correlations and tiding the data frame for numeric variables
 df.train.cor <- df.train %>% 
@@ -375,8 +375,8 @@ Anyhow these 10 variables are correlated we an increase in price. Let's do some 
 We'll be doing this by using `map()` from the `purrr`-package to generate a linear model ( `lm()` ) including the nice coefficients for each of the variables. 
 
 ```{r}
-require(tidyr)
-require(purrr)
+library(tidyr)
+library(purrr)
 
 
 df.train.model <- data.frame(variable = interestingVariables,stringsAsFactors = FALSE)
@@ -417,8 +417,4 @@ slope_terms %>%
 2. kolla outliers via boxplot för topp 10 + kolla Pedro's
 3. välj ut variabler och testa vilka som faktiskt skulle kunna predicta SalePrice
 4. Utvärdera resultat => välj modell
-
-
-
-
 
