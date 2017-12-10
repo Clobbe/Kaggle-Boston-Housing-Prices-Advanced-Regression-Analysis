@@ -16,7 +16,7 @@ Need to clean up this bulletlist later + write an introduction to the case and t
 
 4.  **Basic cleaning** We'll clean the dataset and handle the missing data, outliers and categorical variables.
 
-5.  **Test assumptions** We'll check if our data meets the assumptions required by most multivariate techniques.
+5.  **Test assumptions** We'll check if our data meets the assumptions libraryd by most multivariate techniques.
 
 Pick up the right toolset
 -------------------------
@@ -166,12 +166,8 @@ Seems like we're dealing with a right skewed distribution, meaning it's deviatin
 Let's find out just how skewed the distribution is.
 
 ``` r
-require(moments)
-```
+library(moments)
 
-    ## Loading required package: moments
-
-``` r
 df.train %>% 
   select(SalePrice) %>% 
   summarise(
@@ -192,8 +188,6 @@ Let's dig deeper into the relationship
 ======================================
 
 So up until now we've only looked at the relationship between `SalePrice` and numeric variables. What about the categorical variable `OverallQual`? We already know that's it's related with `SalePrice` but not how much.
-
-    ## Loading required package: RColorBrewer
 
 ``` r
 df.train %>% 
@@ -268,12 +262,8 @@ In order to find which variables that correlate with the target `SalePrice` we c
 Let's start with a heatmap!
 
 ``` r
-require(reshape2) #loading the right package
-```
+library(reshape2) #loading the right package
 
-    ## Loading required package: reshape2
-
-``` r
 #calculating correlations and tiding the data frame for numeric variables
 df.train.cor <- df.train %>% 
   select_if(is.numeric) %>% 
@@ -371,10 +361,8 @@ Anyhow these 10 variables are correlated we an increase in price. Let's do some 
 We'll be doing this by using `map()` from the `purrr`-package to generate a linear model ( `lm()` ) including the nice coefficients for each of the variables.
 
 ``` r
-require(tidyr)
+library(tidyr)
 ```
-
-    ## Loading required package: tidyr
 
     ## 
     ## Attaching package: 'tidyr'
@@ -384,12 +372,9 @@ require(tidyr)
     ##     smiths
 
 ``` r
-require(purrr)
-```
+library(purrr)
 
-    ## Loading required package: purrr
 
-``` r
 df.train.model <- data.frame(variable = interestingVariables,stringsAsFactors = FALSE)
 
 
