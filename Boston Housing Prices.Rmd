@@ -39,7 +39,7 @@ library(emojifont)
 load.emojifont(font = "EmojiOne.ttf")
 ```
 
-```{r }
+```{r echo=FALSE}
 df.test.raw <- read_csv('test.csv', col_names = T)
 df.train.raw <- read_csv('train.csv', col_names = T)
 
@@ -119,10 +119,9 @@ To get the overview and find which variables that correlate with increased price
 
 ```{r echo = FALSE, eval= FALSE }
 df.train.hi <- df.train %>% select(expectation.hi)
-df.train.med <- df.train %>% select(expectation.med)
 
 library(GGally)
-ggpairs(df.train.hi, cardinality_threshold = 25)
+# ggpairs(df.train.hi, cardinality_threshold = 25)
 ```
 
 ###Variables expected to have 'Hi' influence
@@ -146,9 +145,10 @@ The scope for this project is to build a model that from a set of variables (whi
 Let's find out what we know about `SalePrice`. 
 
 ```{r }
+library(skimr)
 df.train %>% 
   select(SalePrice) %>% 
-  summary()
+  skim()
 ```
 
 ###First off - this looks perfect!
@@ -220,9 +220,7 @@ Let's dig deeper on the second categorical variable
 df.train %>% 
   ggplot(aes(x = as.factor(YearBuilt), y = SalePrice, fill = as.factor(YearBuilt))) + 
     geom_boxplot(alpha = 0.8,
-                 outlier.alpha = 0.6,
-                 position = 'jitter',
-                 color = NA) +
+                 outlier.alpha = 0.6) +
   
     geom_smooth(aes(group=1),
                 method = "lm",
@@ -248,7 +246,7 @@ As seen above the black trendline helps us to determine that there is a positive
 
 We've now found that:
 
-* `YearBuilt`, `OverallQual`, `YearRemodAdd` and `TotRmsAbvGrd` are all variables that's lineraly related with `SalePrice` .
+* `YearBuilt`, `OverallQual`, `YearRemodAdd` and `TotRmsAbvGrd` are all variables that's correlating with `SalePrice` .
 
 
 > *"But, hey! That's only 4 variables out of 81 available. Don't you miss out on a lot of potential variables that could have siginificant affect on the target?"*
@@ -371,68 +369,114 @@ df.train.cor.filtered <- df.train.cor %>%
 As one can see the labels doesn't contribute that much to our case, but it was a good and valid hypothesis to try. So for now, let's continue without it.
 
 ###Health check - can we trust this?
-Anyhow these 10 variables are correlated we an increase in price. Let's do some health check on each correlation to see that all of them is normally distributed or not. We'll do this with some plots in `ggplot2` and `qplot`.
+Anyhow these 10 variables are correlated we an increase in price. Let's do some health check on each correlation to see that all of them is normally distributed or not. We'll do this with some plots in `ggplot2` but first let's structure the underlying data a bit and fit a model for each variable.
 
-
-
-1. plotta resp variabels  som bell-kurva + propability plot
-2. normalisera de som inte är norm mot SalesPrice
-
+I choose to take some inspiration from a handy technique presented by [Hadley Wickham at PLOTCON 2016], (https://rpubs.com/aaronsaunders/237010).
 
 
 ```{r}
-library(lindia)
 library(tidyr)
 library(purrr)
 library(broom)
-library(ggfortify)
 
 df.train.filtered <- df.train %>% 
-  select(interestingVariables, SalePrice)
+  select(interestingVariables, SalePrice) %>% 
+  gather(var, value, -SalePrice) %>%
+  group_by(var) %>% 
+  nest()
 
-df.train.filtered.model <- df.train.filtered %>% 
-  lm(data, SalePrice ~ interestingVariables, .) %>% 
-  mutate(model = tidy(.))
 
+df.train.filtered
 ```
 
+Pretty!
+No we have one data frame for each model containing the values for each of the variables and the target, SalePrice.
+
+Now we can proceed to fit a linear model to each of the variables and utilize some of the magic that follows by using the `broom`-package to get some tidy coefficients which will help us proceed with our health check. 
+
+
+```{r}
+#creating a function to map against each variable and it's data frame.
+lm_model <- function(df){
+  lm(SalePrice ~ value, data = df)
+}
+
+df.train.filtered.model <- df.train.filtered %>%
+    mutate(model = map(data, lm_model)) %>% 
+    mutate( glance  = map(model, glance),
+            rsq     = glance %>% map_dbl('r.squared'),
+            tidy    = map(model, tidy),
+            augment = map(model, augment)
+           )
+df.train.filtered.model
+```
+
+Alright!
+Now we have all the underlying data that's needed in order to run our health check. Next up will be to plot the r-squared value for each variable to get a hunch of how well the model actually fit.
+
+
+
+
+```{r}
+df.train.filtered.model %>% 
+  ggplot(aes(x = rsq, y= reorder(var, rsq))) +
+  geom_point(aes(color = var)) +
+  labs(y = "variable")
+```
+
+Now this justs gives us a good hint of how well each variable is to describe our target `SalePrice`, and it's pretty clear that the winner among our top 10 is `OverallQual`.
+
+But this is not enough, let's have a look at each fitted residual to see what's going on under the hood (each point in the above plot.)
+
+Thank you again Pedro for the guidance and steering us toward checking the distribution of the variables.
+
+```{r}
+df.train.filtered.model %>%
+  unnest(augment) %>% 
+```
+
+```{r}
+library(scales)
+df.train.filtered.model %>%
+  unnest(tidy) %>% 
+  filter(term == value)
+  ggplot(aes(rsq)) +
+    geom_line(aes(group = var), alpha = 0.1) +
+    geom_hline(yintercept = 0, color= "white", size = 2) +
+    geom_smooth(se= TRUE, col = 'green') +
+    scale_x_continuous(labels = comma) +
+    scale_y_continuous(labels = comma) +
+    ylab('Residuals') +
+    ggtitle('Variable = YearBuilt')
+```
+
+
+
+
+```{r}
+library(scales)
+df.train.filtered.model %>%
+  unnest(augment) %>% 
+  ggplot(aes(SalePrice, .resid)) +
+    geom_line(aes(group = var), alpha = 0.1) +
+    geom_hline(yintercept = 0, color= "white", size = 2) +
+    geom_smooth(se= TRUE, col = 'green') +
+    scale_x_continuous(labels = comma) +
+    scale_y_continuous(labels = comma) +
+    ylab('Residuals') +
+    ggtitle('Variable = YearBuilt')
+```
+
+So what we can see in this plot is that `SalePrice` is still highly skewed. In order to setup our selves for a correct analysis let's normalize our data.
 
 
 ```{r}
 
 
-
-
-df.train.model
-  
-  df.train.model %>% 
-  
-
-
-# Perform a linear regression on each item in the data column
-by_year_country %>%
-  nest(-country) %>%
-  mutate(model = map(data, ~ lm(percent_yes ~ year, . )))
-  mutate(tidied = tidy(model))
-
-#exempel på hur gather funkar => riktigt användbart!
-  votes_gathered <- votes_joined %>%
-  gather(topic, has_topic, me:ec) %>%
-  filter(has_topic == 1)
-
-  # Filter for only the slope terms
-slope_terms <- country_coefficients %>%
-  filter(term == "year") %>%
-  mutate(p.adjusted = p.adjust(p.value))
-
-# Add p.adjusted column, then filter
-slope_terms %>%
-  filter(p.adjusted < 0.05)
-
 ```
 
-1. gen lm för topp 10 var
-2. kolla outliers via boxplot för topp 10 + kolla Pedro's
-3. välj ut variabler och testa vilka som faktiskt skulle kunna predicta SalePrice
-4. Utvärdera resultat => välj modell
+#5. Let's test!
+
+
+
 
